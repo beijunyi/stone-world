@@ -1,0 +1,66 @@
+{
+  "textures": {
+    "packages": {
+
+    }
+  },
+
+
+  "animations": {
+    "additions": {
+      "critical_star": {
+        "uid": 1,
+        "duration": 300,
+        "frames": [8722, 8723]
+      },
+      "impact_blue": {
+        "uid": 2,
+        "duration": 300,
+        "frames": [8724, 8725, 8726]
+      },
+      "impact_red": {
+        "uid": 3,
+        "duration": 300,
+        "frames": [8729, 8728, 8727]
+      }
+    }
+  },
+
+
+  "audios": {
+    "mappings": {
+      "sad": {
+        "specials" : {
+          "1": {
+            "uid": 2,
+            "raw": [16, 116, 250]
+          },
+          "2": {
+            "uid": 1,
+            "raw": [18, 19, 118, 119, 251]
+          },
+          "3": {
+            "uid": 4,
+            "raw": [20, 120]
+          },
+          "5": {
+            "uid": 3,
+            "raw": [17, 117, 232]
+          }
+        }
+      },
+      "sae": {
+        "defaults": {
+          "uid": 29,
+          "raw": 50
+        }
+      },
+      "sap": {
+        "defaults": {
+          "uid": 9,
+          "raw": 0
+        }
+      }
+    }
+  }
+}
