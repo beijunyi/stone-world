@@ -1,6 +1,12 @@
 package com.beijunyi.sw.sa.models;
 
-public class SprBlock {
+import com.beijunyi.sw.utils.BitConverter;
+import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryo.KryoSerializable;
+import com.esotericsoftware.kryo.io.Input;
+import com.esotericsoftware.kryo.io.Output;
+
+public class SprBlock implements KryoSerializable{
   private byte direction;
   private byte action;
   private short duration;
@@ -72,5 +78,28 @@ public class SprBlock {
 
   public void setDodgeAudio(short[] dodgeAudio) {
     this.dodgeAudio = dodgeAudio;
+  }
+
+  @Override
+  public void write(Kryo kryo, Output output) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public void read(Kryo kryo, Input input) {
+    setDirection((byte)BitConverter.uint16le(input.readBytes(2)));
+    setAction((byte)BitConverter.uint16le(input.readBytes(2)));
+    setDuration((short)BitConverter.uint32le(input.readBytes(4)));
+    setLength((byte)BitConverter.uint32le(input.readBytes(4)));
+    setImages(new int[length]);
+    setUnknown(new short[length]);
+    setImpactAudio(new short[length]);
+    setDodgeAudio(new short[length]);
+    for(int i = 0; i < getLength(); i++) {
+      getImages()[i] = (int) BitConverter.uint32le(input.readBytes(4));
+      getUnknown()[i] = (short) BitConverter.uint32le(input.readBytes(4));
+      getImpactAudio()[i] = BitConverter.uint8(input.readByte());
+      getDodgeAudio()[i] = BitConverter.uint8(input.readByte());
+    }
   }
 }

@@ -1,6 +1,12 @@
 package com.beijunyi.sw.sa.models;
 
-public class RealBlock {
+import com.beijunyi.sw.utils.BitConverter;
+import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryo.KryoSerializable;
+import com.esotericsoftware.kryo.io.Input;
+import com.esotericsoftware.kryo.io.Output;
+
+public class RealBlock implements KryoSerializable {
   private String magic;
   private byte major;
   private byte minor;
@@ -63,5 +69,26 @@ public class RealBlock {
 
   public void setData(byte[] data) {
     this.data = data;
+  }
+
+  @Override
+  public void write(Kryo kryo, Output output) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public void read(Kryo kryo, Input input) {
+    setMagic(new String(input.readBytes(2)));
+    setMajor((byte) BitConverter.uint8(input.readByte()));
+    setMinor((byte) BitConverter.uint8(input.readByte()));  // 16, 15
+    setWidth((short) BitConverter.uint32le(input.readBytes(4)));
+    setHeight((short) BitConverter.uint32le(input.readBytes(4)));
+    if(major == 1) {
+      setSize((int)BitConverter.uint32le(input.readBytes(4)));
+      setData(input.readBytes(getSize() - 16));
+    } else {
+      input.skip(4); // [36, -101, -125, 0]?
+      setData(input.readBytes(getWidth() * getHeight()));
+    }
   }
 }

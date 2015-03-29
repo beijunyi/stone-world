@@ -1,6 +1,12 @@
 package com.beijunyi.sw.sa.models;
 
-public class AdrnBlock {
+import com.beijunyi.sw.utils.BitConverter;
+import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryo.KryoSerializable;
+import com.esotericsoftware.kryo.io.Input;
+import com.esotericsoftware.kryo.io.Output;
+
+public class AdrnBlock implements KryoSerializable {
   private int id;
   private long address;
   private int size;
@@ -108,5 +114,26 @@ public class AdrnBlock {
 
   public void setMap(int map) {
     this.map = map;
+  }
+
+  @Override
+  public void write(Kryo kryo, Output output) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public void read(Kryo kryo, Input input) {
+    setId((int) BitConverter.uint32le(input.readBytes(4)));
+    setAddress(BitConverter.uint32le(input.readBytes(4)));
+    setSize((int) BitConverter.uint32le(input.readBytes(4)));
+    setxOffset((short)BitConverter.int32le(input.readBytes(4)));
+    setyOffset((short)BitConverter.int32le(input.readBytes(4)));
+    setWidth((short) BitConverter.uint32le(input.readBytes(4)));
+    setHeight((short) BitConverter.uint32le(input.readBytes(4)));
+    setEast((byte) BitConverter.uint8(input.readByte()));
+    setSouth((byte) BitConverter.uint8(input.readByte()));
+    setPath((byte) BitConverter.uint8(input.readByte()));
+    setReference(new String(input.readBytes(45)));
+    setMap((int) BitConverter.uint32le(input.readBytes(4)));
   }
 }

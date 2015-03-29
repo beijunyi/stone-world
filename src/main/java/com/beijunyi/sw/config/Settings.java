@@ -1,32 +1,34 @@
 package com.beijunyi.sw.config;
 
+import java.nio.file.Path;
+
 public class Settings {
 
-  private String saDataPath;
-  private String gmsvDataPath;
-  private String outputPath;
+  private Path saDataPath;
+  private Path gmsvDataPath;
+  private Path outputPath;
 
-  public String getSaDataPath() {
+  public Path getSaDataPath() {
     return saDataPath;
   }
 
-  public void setSaDataPath(String saDataPath) {
+  public void setSaDataPath(Path saDataPath) {
     this.saDataPath = saDataPath;
   }
 
-  public String getGmsvDataPath() {
+  public Path getGmsvDataPath() {
     return gmsvDataPath;
   }
 
-  public void setGmsvDataPath(String gmsvDataPath) {
+  public void setGmsvDataPath(Path gmsvDataPath) {
     this.gmsvDataPath = gmsvDataPath;
   }
 
-  public String getOutputPath() {
+  public Path getOutputPath() {
     return outputPath;
   }
 
-  public void setOutputPath(String outputPath) {
+  public void setOutputPath(Path outputPath) {
     this.outputPath = outputPath;
   }
 }

@@ -1,6 +1,19 @@
 package com.beijunyi.sw.sa.models;
 
-public class LS2Map {
+import java.io.UnsupportedEncodingException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import com.beijunyi.sw.utils.BitConverter;
+import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryo.KryoSerializable;
+import com.esotericsoftware.kryo.io.Input;
+import com.esotericsoftware.kryo.io.Output;
+
+public class LS2Map implements KryoSerializable {
+
+  private static final Pattern NAME_PATTERN = Pattern.compile("^((\\p{L})*)\\|*\u0000*.*$");
+
   private short east;
   private short south;
   private int id;
@@ -54,5 +67,36 @@ public class LS2Map {
 
   public void setObjects(int[] objects) {
     this.objects = objects;
+  }
+
+  @Override
+  public void write(Kryo kryo, Output output) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public void read(Kryo kryo, Input input) {
+    input.skip(6);
+    setId(BitConverter.uint16be(input.readBytes(2)));
+    try {
+      Matcher matcher = NAME_PATTERN.matcher(new String(input.readBytes(32), "gbk"));
+      if(matcher.matches())
+        setName(matcher.group(1));
+    } catch(UnsupportedEncodingException e) {
+      throw new RuntimeException(e);
+    }
+    int east = BitConverter.uint16be(input.readBytes(2));
+    int south = BitConverter.uint16be(input.readBytes(2));
+    setEast((short)east);
+    setSouth((short)south);
+    int total = east * south;
+    int[] tiles = new int[total];
+    for(int i = 0; i < total; i++)
+      tiles[i] = BitConverter.uint16be(input.readBytes(2));
+    setTiles(tiles);
+    int[] objects = new int[east * south];
+    for(int i = 0; i < total; i++)
+      objects[i] = BitConverter.uint16be(input.readBytes(2));
+    setObjects(objects);
   }
 }

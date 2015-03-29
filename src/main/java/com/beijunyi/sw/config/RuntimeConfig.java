@@ -1,12 +1,13 @@
 package com.beijunyi.sw.config;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import com.beijunyi.sw.config.custom.CustomResourcesSettings;
 import org.apache.commons.io.IOUtils;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.*;
 
 @Configuration
@@ -29,17 +30,29 @@ public class RuntimeConfig {
     String gmsvData = System.getProperty("gmsv.data");
     if(gmsvData == null)
       throw new IllegalArgumentException("Missing property \"gmsv.data\"");
-    settings.setGmsvDataPath(gmsvData);
+    Path gmsvDataPath = Paths.get(gmsvData);
+    if(!Files.isDirectory(gmsvDataPath))
+      throw new IllegalArgumentException("Invalid \"gmsv.data\" path: " + gmsvData);
+    settings.setGmsvDataPath(gmsvDataPath);
 
     String saData = System.getProperty("sa.data");
     if(saData == null)
       throw new IllegalArgumentException("Missing property \"sa.data\"");
-    settings.setSaDataPath(saData);
+    Path saDataPath = Paths.get(saData);
+    if(!Files.isDirectory(saDataPath))
+      throw new IllegalArgumentException("Invalid  \"sa.data\" path: " + saData);
+    settings.setSaDataPath(saDataPath);
 
     String output = System.getProperty("output");
     if(output == null)
       throw new IllegalArgumentException("Missing property \"output\"");
-    settings.setOutputPath(output);
+    Path outputPath = Paths.get(output);
+    try {
+      Files.createDirectories(outputPath);
+    } catch(IOException e) {
+      throw new IllegalArgumentException("Cannot create \"output\" path: " + outputPath, e);
+    }
+    settings.setOutputPath(outputPath);
 
     return settings;
   }

@@ -13,13 +13,11 @@ import com.beijunyi.sw.utils.ImageUtils;
 public class ResourcesFactory {
 
   private final SaResourcesManager srm;
-  private final TextureFactory tf;
 
 
   @Inject
-  public ResourcesFactory(SaResourcesManager srm, CustomResourcesSettings crs, TextureFactory tf) {
+  public ResourcesFactory(SaResourcesManager srm) {
     this.srm = srm;
-    this.tf = tf;
   }
 
 

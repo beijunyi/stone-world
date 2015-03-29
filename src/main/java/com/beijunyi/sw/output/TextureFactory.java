@@ -1,7 +1,8 @@
 package com.beijunyi.sw.output;
 
 import java.io.*;
-import javax.annotation.PostConstruct;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -14,23 +15,18 @@ import com.beijunyi.sw.utils.ImageUtils;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.io.IOUtils;
 
 @Named
 public class TextureFactory {
 
-  private final Settings settings;
+  private final Path output;
   private final SaResourcesManager srm;
   private final Kryo kryo;
 
   private final Object[] textureLocks;
-  private String texturesOutputPath;
 
   @Inject
-  public TextureFactory(Settings settings, SaResourcesManager srm, Kryo kryo) {
-    this.settings = settings;
+  public TextureFactory(Settings settings, SaResourcesManager srm, Kryo kryo) throws IOException {
     this.srm = srm;
     this.kryo = kryo;
 
@@ -38,18 +34,14 @@ public class TextureFactory {
     for(int i = 0; i <= srm.getMaxAdrnId(); i++) {
       textureLocks[i] = new Object();
     }
-  }
 
-  @PostConstruct
-  public void setOutputPaths() throws IOException {
-    String outputPath = settings.getOutputPath();
-    texturesOutputPath = FilenameUtils.normalizeNoEndSeparator(FilenameUtils.concat(outputPath, "textures"), true);
-    FileUtils.forceMkdir(new File(texturesOutputPath));
+    output = settings.getOutputPath().resolve("textures");
+    Files.createDirectories(output);
   }
 
 
-  private File getTextureFile(int id) {
-    return new File(FilenameUtils.concat(texturesOutputPath, id + ".bin"));
+  private Path getTextureFile(int id) {
+    return output.resolve(id + ".bin");
   }
 
   private Texture createTextureFromRawResources(int id) {
@@ -90,19 +82,16 @@ public class TextureFactory {
   }
 
   private void outputTextureData(int id, byte[] data) throws IOException {
-    try(OutputStream os = new FileOutputStream(getTextureFile(id))) {
-      IOUtils.write(data, os);
-    }
+    Path textureFile = getTextureFile(id);
+    Files.write(textureFile, data);
   }
 
   private byte[] loadTextureDataFromOutput(int id) throws IOException {
-    File textureFile = getTextureFile(id);
-    if(!textureFile.exists()) {
+    Path textureFile = getTextureFile(id);
+    if(!Files.exists(textureFile)) {
       return null;
     }
-    try(InputStream is = new FileInputStream(textureFile)) {
-      return IOUtils.toByteArray(is);
-    }
+    return Files.readAllBytes(textureFile);
   }
 
   public Texture getTexture(int id, boolean output) throws IOException {
