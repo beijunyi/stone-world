@@ -14,9 +14,7 @@
 </head>
 <body  ng-app="app">
 
-<div ng-controller="MainController">
-  <pixi params="pixiParams"></pixi>
-</div>
+<world></world>
 
 <jwr:script src="/lib.js"/>
 <jwr:script src="/app.js"/>

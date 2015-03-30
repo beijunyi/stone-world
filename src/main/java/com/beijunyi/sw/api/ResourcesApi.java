@@ -1,36 +1,40 @@
 package com.beijunyi.sw.api;
 
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.zip.GZIPOutputStream;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import javax.ws.rs.*;
-import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.jboss.resteasy.annotations.ContentEncoding;
-import org.jboss.resteasy.annotations.GZIP;
+import com.beijunyi.sw.output.PaletteManager;
+import com.beijunyi.sw.output.TextureManager;
 
 @Named
 @Singleton
 @Path("/api/resources")
 public class ResourcesApi {
 
-  @GET
-  @Path("/image/1.jpg")
-  @Produces("image/jpg")
-  @GZIP
-  public Response getImage() {
-    return Response.ok(new File("G:/origin.jpg")).build();
+  private final PaletteManager pm;
+  private final TextureManager tm;
+
+  public ResourcesApi(PaletteManager pm, TextureManager tm) {
+    this.pm = pm;
+    this.tm = tm;
   }
 
   @GET
-  @Path("/image/2.jpg")
-  @Produces("image/jpg")
-  public Response getImageGz() {
-    return Response.ok(new File("G:/origin.jpg.gz")).header(HttpHeaders.CONTENT_ENCODING, "gzip").build();
+  @Path("/texture/{id}.jpg")
+  @Produces(MediaType.APPLICATION_OCTET_STREAM)
+  public Response getTexture(@PathParam("id") int id) {
+    return Response.ok(tm.getTexture(id)).build();
+  }
+
+  @GET
+  @Path("/palette/{id}.bin")
+  @Produces(MediaType.APPLICATION_OCTET_STREAM)
+  public Response getPalette(@PathParam("id") int id) {
+    return Response.ok(pm.getPalette(id)).build();
   }
 
 }

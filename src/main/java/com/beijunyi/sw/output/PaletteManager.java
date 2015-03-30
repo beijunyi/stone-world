@@ -77,7 +77,7 @@ public class PaletteManager {
     Files.createDirectories(paletteDir);
   }
 
-  public Path getOutputPalettePath(int id) {
+  private Path getOutputPalettePath(int id) {
     return paletteDir.resolve(id + ".bin");
   }
 
