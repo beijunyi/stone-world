@@ -3,9 +3,8 @@ package com.beijunyi.sw.sa;
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-import java.nio.file.DirectoryStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
@@ -40,7 +39,7 @@ public class SaResourcesManager {
   private final FileChannel sprRA;
   private final Map<Integer, Path> paletFilesMap;
 
-  private final Map<Integer, LS2Map> idLs2MapMap = new HashMap<>();
+  private final Map<Integer, LS2Map> ls2Maps;
 
   @Inject
   public SaResourcesManager(Settings settings, Kryo kryo) throws Exception {
@@ -61,15 +60,7 @@ public class SaResourcesManager {
     paletFilesMap = resources.get(ClientResource.PALET);
 
     Path gmsvDataPath = settings.getGmsvDataPath();
-    Path mapDir = gmsvDataPath.resolve("map");
-    try(DirectoryStream<Path> maps = Files.newDirectoryStream(mapDir)) {
-      for(Path map : maps) {
-        try(InputStream is = Files.newInputStream(map)) {
-          LS2Map ls2Map = kryo.readObject(new Input(is), LS2Map.class);
-          idLs2MapMap.put(ls2Map.getId(), ls2Map);
-        }
-      }
-    }
+    ls2Maps = indexLs2Maps(gmsvDataPath, kryo);
   }
 
   @PreDestroy
@@ -210,7 +201,32 @@ public class SaResourcesManager {
     return palet;
   }
 
-  public Map<Integer, LS2Map> getIdLs2MapMap() {
-    return idLs2MapMap;
+  public static Map<Integer, LS2Map> indexLs2Maps(Path gmsvDataPath, final Kryo kryo) throws IOException {
+    Path mapDir = gmsvDataPath.resolve("map");
+    final Map<Integer, LS2Map> maps = new HashMap<>();
+    Files.walkFileTree(mapDir, new SimpleFileVisitor<Path>() {
+      @Override
+      public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+        return FileVisitResult.CONTINUE;
+      }
+
+      @Override
+      public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+        try(InputStream is = Files.newInputStream(file)) {
+          try {
+            LS2Map ls2Map = kryo.readObject(new Input(is), LS2Map.class);
+            maps.put(ls2Map.getId(), ls2Map);
+          } catch(IllegalArgumentException e) {
+            log.debug("Invalid map file: " + file, e);
+          }
+        }
+        return FileVisitResult.CONTINUE;
+      }
+    });
+    return maps;
+  }
+
+  public Map<Integer, LS2Map> getLs2Maps() {
+    return ls2Maps;
   }
 }

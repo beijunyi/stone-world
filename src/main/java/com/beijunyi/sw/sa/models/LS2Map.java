@@ -76,10 +76,13 @@ public class LS2Map implements KryoSerializable {
 
   @Override
   public void read(Kryo kryo, Input input) {
-    input.skip(6);
+    String type = new String(input.readBytes(6));
+    if(!type.equals("LS2MAP"))
+      throw new IllegalArgumentException(type);
     setId(BitConverter.uint16be(input.readBytes(2)));
     try {
-      Matcher matcher = NAME_PATTERN.matcher(new String(input.readBytes(32), "gbk"));
+      String rawName = new String(input.readBytes(32), "gbk");
+      Matcher matcher = NAME_PATTERN.matcher(rawName);
       if(matcher.matches())
         setName(matcher.group(1));
     } catch(UnsupportedEncodingException e) {

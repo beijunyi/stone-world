@@ -1,4 +1,3 @@
-<%@ page contentType="text/html; charset=UTF-8" language="java" %>
 <%@ taglib uri="http://jawr.net/tags" prefix="jwr" %>
 <%@ page contentType="text/html;charset=UTF-8" %>
 
@@ -7,7 +6,7 @@
 <head>
   <base href="/">
   <meta charset="utf-8"/>
-  <title>ch</title>
+  <title>stone-world</title>
 
   <jwr:style src="/lib.css"/>
   <jwr:style src="/app.css"/>
