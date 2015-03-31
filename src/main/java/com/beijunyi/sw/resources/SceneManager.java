@@ -1,4 +1,4 @@
-package com.beijunyi.sw.output;
+package com.beijunyi.sw.resources;
 
 import java.io.*;
 import java.nio.charset.Charset;
@@ -13,7 +13,7 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 
 import com.beijunyi.sw.config.Settings;
-import com.beijunyi.sw.output.models.Scene;
+import com.beijunyi.sw.resources.models.Scene;
 import com.beijunyi.sw.sa.SaResourcesManager;
 import com.beijunyi.sw.sa.models.*;
 import com.esotericsoftware.kryo.Kryo;
@@ -31,7 +31,7 @@ public class SceneManager {
   private final Path scenesDir;
   private final Object[] locks;
 
-  private Map<Integer, Scene> scenes = new HashMap<>();
+  private Map<Integer, byte[]> scenes = new HashMap<>();
 
   @Inject
   public SceneManager(Settings settings, SaResourcesManager srm, Kryo kryo) throws IOException {
@@ -40,45 +40,49 @@ public class SceneManager {
     scenesDir = settings.getOutputPath().resolve("scenes");
     Files.createDirectories(scenesDir);
     locks = new Object[srm.getMaxLS2MapId() + 1];
+    for(int i = 0; i < locks.length; i++)
+      locks[i] = new Object();
   }
 
   private Path getOutputScenePath(int id) {
     return scenesDir.resolve(id + ".bin");
   }
 
-  public Scene getScene(int id) {
+  public byte[] getSceneData(int id) {
     if(id < 0 || id >= locks.length)
       throw new IllegalArgumentException("Invalid id: " + id);
-    Scene scene = scenes.get(id);
-    if(scene == null) {
+    byte[] data = scenes.get(id);
+    if(data == null) {
       synchronized(this) {
         // try again
-        scene = scenes.get(id);
-        if(scene != null)
-          return scene;
+        data = scenes.get(id);
+        if(data != null)
+          return data;
 
         Path outputTexturePath = getOutputScenePath(id);
         if(Files.exists(outputTexturePath)) {
-          try(InputStream input = Files.newInputStream(outputTexturePath)) {
-            scene = kryo.readObject(new Input(input), Scene.class);
+          try {
+            data = Files.readAllBytes(outputTexturePath);
           } catch(IOException e) {
             throw new RuntimeException("Could not read " + outputTexturePath, e);
           }
         } else {
-          LS2Map map = srm.getLS2Map(id);
-          scene = createScene(map);
-          try(OutputStream stream = Files.newOutputStream(outputTexturePath)) {
-            Output output = new Output(stream);
-            kryo.writeObject(output, scene);
-            output.flush();
+          Scene scene = createScene(srm.getLS2Map(id));
+          ByteArrayOutputStream stream = new ByteArrayOutputStream();
+          Output output = new Output(stream);
+          kryo.writeObject(output, scene);
+          output.flush();
+          data = stream.toByteArray();
+          try {
+            Files.write(outputTexturePath, data);
           } catch(IOException e) {
             throw new RuntimeException("Could not write " + outputTexturePath, e);
           }
         }
-        scenes.put(id, scene);
+        scenes.put(id, data);
       }
     }
-    return scene;
+    return data;
   }
 
   private static Scene createScene(LS2Map map) {

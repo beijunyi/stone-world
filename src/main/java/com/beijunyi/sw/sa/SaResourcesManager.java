@@ -47,6 +47,8 @@ public class SaResourcesManager {
     this.settings = settings;
     this.kryo = kryo;
 
+    Path clientDataPath = settings.getSaDataPath();
+
     Map<ClientResource, Map<Integer, Path>> resources = locateClientResources();
     try(InputStream is = Files.newInputStream(resources.get(ClientResource.ADRN).values().iterator().next())) {
       Adrn adrn = kryo.readObject(new Input(is), Adrn.class);
@@ -59,7 +61,7 @@ public class SaResourcesManager {
     realRA = FileChannel.open(resources.get(ClientResource.REAL).values().iterator().next());
     sprRA = FileChannel.open(resources.get(ClientResource.SPR).values().iterator().next());
 
-    indexPalets(resources);
+    indexPalets(clientDataPath);
 
     Path gmsvDataPath = settings.getGmsvDataPath();
     indexLS2Maps(gmsvDataPath, kryo);
@@ -190,11 +192,22 @@ public class SaResourcesManager {
     return blocks;
   }
 
-  private void indexPalets(Map<ClientResource, Map<Integer, Path>> resources) {
-    paletFiles = resources.get(ClientResource.PALET);
-    for(int id : paletFiles.keySet())
-      if(id > maxPaletId)
-        maxPaletId = id;
+  private void indexPalets(Path clientDataPath) throws IOException {
+    paletFiles = new HashMap<>();
+    Path palsDir = clientDataPath.resolve("pal");
+    if(Files.exists(palsDir)) {
+      try(DirectoryStream<Path> pals = Files.newDirectoryStream(palsDir)) {
+        for(Path pal : pals) {
+          String label = ClientResource.PALET.matches(pal.getFileName().toString());
+          if(label == null)
+            continue;
+          int id = Integer.valueOf(label);
+          paletFiles.put(id, pal);
+          if(id > maxPaletId)
+            maxPaletId = id;
+        }
+      }
+    }
   }
 
   public int getMaxPaletId() {

@@ -1,4 +1,4 @@
-package com.beijunyi.sw.output.models;
+package com.beijunyi.sw.resources.models;
 
 import java.util.ArrayList;
 import java.util.List;

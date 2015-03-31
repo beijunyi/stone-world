@@ -1,4 +1,4 @@
-app.service('TrafficService', function() {
+app.service('TrafficService', function($timeout) {
   var queue = [];
   var count = 0;
   return {
@@ -7,8 +7,10 @@ app.service('TrafficService', function() {
     },
     onResponse: function() {
       if(--count == 0) {
-        angular.forEach(queue, function(fn) {
-          fn();
+        $timeout(function() {
+          angular.forEach(queue, function(fn) {
+            fn();
+          });
         });
       }
     },
@@ -26,9 +28,11 @@ app.config(function($httpProvider) {
     return {
       request: function(config) {
         TrafficService.onRequest(config);
+        return config;
       },
       response: function(response) {
         TrafficService.onResponse(response);
+        return response;
       }
     }
   });

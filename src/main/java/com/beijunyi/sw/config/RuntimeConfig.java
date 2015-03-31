@@ -35,12 +35,12 @@ public class RuntimeConfig {
       throw new IllegalArgumentException("Invalid \"gmsv.data\" path: " + gmsvData);
     settings.setGmsvDataPath(gmsvDataPath);
 
-    String saData = System.getProperty("sa.data");
+    String saData = System.getProperty("client.data");
     if(saData == null)
-      throw new IllegalArgumentException("Missing property \"sa.data\"");
+      throw new IllegalArgumentException("Missing property \"client.data\"");
     Path saDataPath = Paths.get(saData);
     if(!Files.isDirectory(saDataPath))
-      throw new IllegalArgumentException("Invalid  \"sa.data\" path: " + saData);
+      throw new IllegalArgumentException("Invalid  \"client.data\" path: " + saData);
     settings.setSaDataPath(saDataPath);
 
     String output = System.getProperty("output");

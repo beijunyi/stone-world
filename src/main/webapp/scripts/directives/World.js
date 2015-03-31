@@ -1,4 +1,4 @@
-app.directive('world', function(ResourcesApi, PalettesService, StageService) {
+app.directive('world', function(ResourcesService, PalettesService, SceneService) {
   return {
     restrict: 'E',
     scope: {
@@ -7,9 +7,8 @@ app.directive('world', function(ResourcesApi, PalettesService, StageService) {
     controller: function($scope) {
     },
     link: function($scope, $element) {
-      PalettesService.initialize(1).then(function() {
-        $element.append(StageService.initialize(0x000000, 1200 , 675));
-      });
+      PalettesService.preparePalette(1);
+      SceneService.prepareScene(2000);
     }
   };
 });

@@ -1,4 +1,4 @@
-package com.beijunyi.sw.output;
+package com.beijunyi.sw.resources;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -9,13 +9,12 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import com.beijunyi.sw.config.Settings;
-import com.beijunyi.sw.output.models.Texture;
+import com.beijunyi.sw.resources.models.Texture;
 import com.beijunyi.sw.sa.SaResourcesManager;
 import com.beijunyi.sw.sa.models.AdrnBlock;
 import com.beijunyi.sw.sa.models.RealBlock;
 import com.beijunyi.sw.utils.BitConverter;
 import com.esotericsoftware.kryo.Kryo;
-import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 
 @Named
@@ -26,7 +25,7 @@ public class TextureManager {
   private final Path texturesDir;
   private final Object[] locks;
 
-  private Map<Integer, Texture> textures = new HashMap<>();
+  private Map<Integer, byte[]> textures = new HashMap<>();
 
   @Inject
   public TextureManager(Settings settings, SaResourcesManager srm, Kryo kryo) throws IOException {
@@ -35,46 +34,51 @@ public class TextureManager {
     texturesDir = settings.getOutputPath().resolve("textures");
     Files.createDirectories(texturesDir);
     locks = new Object[srm.getMaxAdrnId() + 1];
+    for(int i = 0; i < locks.length; i++)
+      locks[i] = new Object();
   }
 
   private Path getOutputTexturePath(int id) {
     return texturesDir.resolve(id + ".bin");
   }
 
-  public Texture getTexture(int id) {
+  public byte[] getTextureData(int id) {
     if(id < 0 || id >= locks.length)
       throw new IllegalArgumentException("Invalid id: " + id);
-    Texture texture = textures.get(id);
-    if(texture == null) {
+    byte[] data = textures.get(id);
+    if(data == null) {
       synchronized(this) {
         // try again
-        texture = textures.get(id);
-        if(texture != null)
-          return texture;
+        data = textures.get(id);
+        if(data != null)
+          return data;
 
         Path outputTexturePath = getOutputTexturePath(id);
         if(Files.exists(outputTexturePath)) {
-          try(InputStream input = Files.newInputStream(outputTexturePath)) {
-            texture = kryo.readObject(new Input(input), Texture.class);
+          try {
+            data = Files.readAllBytes(outputTexturePath);
           } catch(IOException e) {
             throw new RuntimeException("Could not read " + outputTexturePath, e);
           }
         } else {
           AdrnBlock adrn = srm.getAdrnBlock(id);
           RealBlock real = srm.getRealBlock(adrn.getAddress(), adrn.getSize());
-          texture = createTexture(adrn, real);
-          try(OutputStream stream = Files.newOutputStream(outputTexturePath)) {
-            Output output = new Output(stream);
-            kryo.writeObject(output, texture);
-            output.flush();
+          Texture texture = createTexture(adrn, real);
+          ByteArrayOutputStream stream = new ByteArrayOutputStream();
+          Output output = new Output(stream);
+          kryo.writeObject(output, texture);
+          output.flush();
+          data = stream.toByteArray();
+          try {
+            Files.write(outputTexturePath, data);
           } catch(IOException e) {
             throw new RuntimeException("Could not write " + outputTexturePath, e);
           }
         }
-        textures.put(id, texture);
+        textures.put(id, data);
       }
     }
-    return texture;
+    return data;
   }
 
   private static Texture createTexture(AdrnBlock adrn, RealBlock real) {

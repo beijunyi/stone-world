@@ -4,9 +4,9 @@ app.service('PalettesService', function($q, ResourcesService) {
   var palettes = {};
 
   return {
-    usePalette: function(id) {
+    preparePalette: function(id) {
       if(palettes[id] == null) {
-        ResourcesService.palette(id).success(function(palette) {
+        ResourcesService.palette(id).then(function(palette) {
           palettes[id] = palette;
         });
       }

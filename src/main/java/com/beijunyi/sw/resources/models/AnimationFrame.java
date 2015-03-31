@@ -1,4 +1,4 @@
-package com.beijunyi.sw.output.models;
+package com.beijunyi.sw.resources.models;
 
 import com.beijunyi.sw.utils.BitConverter;
 import com.esotericsoftware.kryo.Kryo;

@@ -1,11 +1,11 @@
-package com.beijunyi.sw.output.models;
+package com.beijunyi.sw.resources.models;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.KryoSerializable;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 
-public class Texture implements KryoSerializable{
+public class Texture implements KryoSerializable {
 
   private short x;
   private short y;

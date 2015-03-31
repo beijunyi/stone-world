@@ -1,8 +1,6 @@
-package com.beijunyi.sw.output;
+package com.beijunyi.sw.resources;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
@@ -12,11 +10,10 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 
 import com.beijunyi.sw.config.Settings;
-import com.beijunyi.sw.output.models.Palette;
+import com.beijunyi.sw.resources.models.Palette;
 import com.beijunyi.sw.sa.SaResourcesManager;
 import com.beijunyi.sw.sa.models.Palet;
 import com.esotericsoftware.kryo.Kryo;
-import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 
 @Named
@@ -68,7 +65,7 @@ public class PaletteManager {
   private final Path palettesDir;
   private final Object[] locks;
 
-  private Map<Integer, Palette> palettes = new HashMap<>();
+  private Map<Integer, byte[]> palettes = new HashMap<>();
 
   @Inject
   public PaletteManager(SaResourcesManager srm, Kryo kryo, Settings settings) throws IOException {
@@ -77,44 +74,49 @@ public class PaletteManager {
     palettesDir = settings.getOutputPath().resolve("palettes");
     Files.createDirectories(palettesDir);
     locks = new Object[srm.getMaxPaletId() + 1];
+    for(int i = 0; i < locks.length; i++)
+      locks[i] = new Object();
   }
 
   private Path getOutputPalettePath(int id) {
     return palettesDir.resolve(id + ".bin");
   }
 
-  public Palette getPalette(int id) {
+  public byte[] getPaletteData(int id) {
     if(id < 0 || id >= locks.length)
       throw new IllegalArgumentException("Invalid id: " + id);
-    Palette palette = palettes.get(id);
-    if(palette == null) {
+    byte[] data = palettes.get(id);
+    if(data == null) {
       synchronized(locks[id]) {
         // try again
-        palette = palettes.get(id);
-        if(palette != null)
-          return palette;
+        data = palettes.get(id);
+        if(data != null)
+          return data;
 
         Path outputPalettePath = getOutputPalettePath(id);
         if(Files.exists(outputPalettePath)) {
-          try(InputStream input = Files.newInputStream(outputPalettePath)) {
-            palette = kryo.readObject(new Input(input), Palette.class);
+          try {
+            data = Files.readAllBytes(outputPalettePath);
           } catch(IOException e) {
             throw new RuntimeException("Could not read " + outputPalettePath, e);
           }
         } else {
-          palette = createPalette(srm.getPalet(id));
-          try(OutputStream stream = Files.newOutputStream(outputPalettePath)) {
-            Output output = new Output(stream);
-            kryo.writeObject(output, palette);
-            output.flush();
+          Palette palette = createPalette(srm.getPalet(id));
+          ByteArrayOutputStream stream = new ByteArrayOutputStream();
+          Output output = new Output(stream);
+          kryo.writeObject(output, palette);
+          output.flush();
+          data = stream.toByteArray();
+          try {
+            Files.write(outputPalettePath, data);
           } catch(IOException e) {
             throw new RuntimeException("Could not write " + outputPalettePath, e);
           }
         }
-        palettes.put(id, palette);
+        palettes.put(id, data);
       }
     }
-    return palette;
+    return data;
   }
 
   private static Palette createPalette(Palet palet) {
