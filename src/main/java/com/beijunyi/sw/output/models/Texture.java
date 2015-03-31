@@ -60,7 +60,6 @@ public class Texture implements KryoSerializable{
     output.writeShort(width);
     output.writeShort(height);
     output.writeBytes(bitmap);
-    output.flush();
   }
 
   @Override

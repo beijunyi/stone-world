@@ -24,7 +24,6 @@ public class Palette implements KryoSerializable {
   @Override
   public void write(Kryo kryo, Output output) {
     output.write(rgba);
-    output.flush();
   }
 
   @Override

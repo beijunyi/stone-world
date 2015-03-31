@@ -65,7 +65,8 @@ public class PaletteManager {
 
   private final SaResourcesManager srm;
   private final Kryo kryo;
-  private final Path paletteDir;
+  private final Path palettesDir;
+  private final Object[] locks;
 
   private Map<Integer, Palette> palettes = new HashMap<>();
 
@@ -73,18 +74,21 @@ public class PaletteManager {
   public PaletteManager(SaResourcesManager srm, Kryo kryo, Settings settings) throws IOException {
     this.srm = srm;
     this.kryo = kryo;
-    paletteDir = settings.getOutputPath().resolve("palettes");
-    Files.createDirectories(paletteDir);
+    palettesDir = settings.getOutputPath().resolve("palettes");
+    Files.createDirectories(palettesDir);
+    locks = new Object[srm.getMaxPaletId() + 1];
   }
 
   private Path getOutputPalettePath(int id) {
-    return paletteDir.resolve(id + ".bin");
+    return palettesDir.resolve(id + ".bin");
   }
 
   public Palette getPalette(int id) {
+    if(id < 0 || id >= locks.length)
+      throw new IllegalArgumentException("Invalid id: " + id);
     Palette palette = palettes.get(id);
     if(palette == null) {
-      synchronized(this) {
+      synchronized(locks[id]) {
         // try again
         palette = palettes.get(id);
         if(palette != null)
@@ -99,8 +103,10 @@ public class PaletteManager {
           }
         } else {
           palette = createPalette(srm.getPalet(id));
-          try(OutputStream output = Files.newOutputStream(outputPalettePath)) {
-            kryo.writeObject(new Output(output), palette);
+          try(OutputStream stream = Files.newOutputStream(outputPalettePath)) {
+            Output output = new Output(stream);
+            kryo.writeObject(output, palette);
+            output.flush();
           } catch(IOException e) {
             throw new RuntimeException("Could not write " + outputPalettePath, e);
           }

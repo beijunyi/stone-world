@@ -7,6 +7,7 @@ import java.util.regex.Pattern;
 import com.beijunyi.sw.utils.BitConverter;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.KryoSerializable;
+import com.esotericsoftware.kryo.Serializer;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 
@@ -25,48 +26,24 @@ public class LS2Map implements KryoSerializable {
     return east;
   }
 
-  public void setEast(short east) {
-    this.east = east;
-  }
-
   public short getSouth() {
     return south;
-  }
-
-  public void setSouth(short south) {
-    this.south = south;
   }
 
   public int getId() {
     return id;
   }
 
-  public void setId(int id) {
-    this.id = id;
-  }
-
   public String getName() {
     return name;
-  }
-
-  public void setName(String name) {
-    this.name = name;
   }
 
   public int[] getTiles() {
     return tiles;
   }
 
-  public void setTiles(int[] tiles) {
-    this.tiles = tiles;
-  }
-
   public int[] getObjects() {
     return objects;
-  }
-
-  public void setObjects(int[] objects) {
-    this.objects = objects;
   }
 
   @Override
@@ -76,30 +53,42 @@ public class LS2Map implements KryoSerializable {
 
   @Override
   public void read(Kryo kryo, Input input) {
-    String type = new String(input.readBytes(6));
-    if(!type.equals("LS2MAP"))
-      throw new IllegalArgumentException(type);
-    setId(BitConverter.uint16be(input.readBytes(2)));
+    input.skip(6);
+    id = BitConverter.uint16be(input.readBytes(2));
     try {
       String rawName = new String(input.readBytes(32), "gbk");
       Matcher matcher = NAME_PATTERN.matcher(rawName);
       if(matcher.matches())
-        setName(matcher.group(1));
+        name = matcher.group(1);
     } catch(UnsupportedEncodingException e) {
       throw new RuntimeException(e);
     }
-    int east = BitConverter.uint16be(input.readBytes(2));
-    int south = BitConverter.uint16be(input.readBytes(2));
-    setEast((short)east);
-    setSouth((short)south);
+    east = (short) BitConverter.uint16be(input.readBytes(2));
+    south = (short) BitConverter.uint16be(input.readBytes(2));
     int total = east * south;
-    int[] tiles = new int[total];
+    tiles = new int[total];
     for(int i = 0; i < total; i++)
       tiles[i] = BitConverter.uint16be(input.readBytes(2));
-    setTiles(tiles);
-    int[] objects = new int[east * south];
+    objects = new int[east * south];
     for(int i = 0; i < total; i++)
       objects[i] = BitConverter.uint16be(input.readBytes(2));
-    setObjects(objects);
+  }
+
+  public static class MapHeaderSerializer extends Serializer<LS2Map> {
+
+    @Override
+    public void write(Kryo kryo, Output output, LS2Map object) {
+      throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public LS2Map read(Kryo kryo, Input input, Class<LS2Map> type) {
+      String sig = new String(input.readBytes(6));
+      if(!sig.equals("LS2MAP"))
+        throw new IllegalArgumentException(sig);
+      LS2Map map = new LS2Map();
+      map.id = BitConverter.uint16be(input.readBytes(2));
+      return map;
+    }
   }
 }

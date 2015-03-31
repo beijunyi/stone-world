@@ -14,7 +14,6 @@ import com.beijunyi.sw.sa.SaResourcesManager;
 import com.beijunyi.sw.sa.models.AdrnBlock;
 import com.beijunyi.sw.sa.models.RealBlock;
 import com.beijunyi.sw.utils.BitConverter;
-import com.beijunyi.sw.utils.ImageUtils;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
@@ -23,8 +22,9 @@ import com.esotericsoftware.kryo.io.Output;
 public class TextureManager {
 
   private final SaResourcesManager srm;
-  private final Path textureDir;
   private final Kryo kryo;
+  private final Path texturesDir;
+  private final Object[] locks;
 
   private Map<Integer, Texture> textures = new HashMap<>();
 
@@ -32,15 +32,18 @@ public class TextureManager {
   public TextureManager(Settings settings, SaResourcesManager srm, Kryo kryo) throws IOException {
     this.srm = srm;
     this.kryo = kryo;
-    textureDir = settings.getOutputPath().resolve("textures");
-    Files.createDirectories(textureDir);
+    texturesDir = settings.getOutputPath().resolve("textures");
+    Files.createDirectories(texturesDir);
+    locks = new Object[srm.getMaxAdrnId() + 1];
   }
 
   private Path getOutputTexturePath(int id) {
-    return textureDir.resolve(id + ".bin");
+    return texturesDir.resolve(id + ".bin");
   }
 
   public Texture getTexture(int id) {
+    if(id < 0 || id >= locks.length)
+      throw new IllegalArgumentException("Invalid id: " + id);
     Texture texture = textures.get(id);
     if(texture == null) {
       synchronized(this) {
@@ -60,8 +63,10 @@ public class TextureManager {
           AdrnBlock adrn = srm.getAdrnBlock(id);
           RealBlock real = srm.getRealBlock(adrn.getAddress(), adrn.getSize());
           texture = createTexture(adrn, real);
-          try(OutputStream output = Files.newOutputStream(outputTexturePath)) {
-            kryo.writeObject(new Output(output), texture);
+          try(OutputStream stream = Files.newOutputStream(outputTexturePath)) {
+            Output output = new Output(stream);
+            kryo.writeObject(output, texture);
+            output.flush();
           } catch(IOException e) {
             throw new RuntimeException("Could not write " + outputTexturePath, e);
           }

@@ -27,8 +27,6 @@ public class SaResourcesManager {
   private final Settings settings;
   private final Kryo kryo;
 
-  private final Map<ClientResource, Map<Integer, Path>> resources;
-
   private final Map<Integer, AdrnBlock> idAdrnMap = new HashMap<>();
   private final Map<Integer, Integer> mapIdMap = new HashMap<>();
   private final Map<Integer, SprAdrnBlock> idSprAdrnMap = new HashMap<>();
@@ -37,16 +35,19 @@ public class SaResourcesManager {
   private final List<Long> sprAddresses = new ArrayList<>();
   private final FileChannel realRA;
   private final FileChannel sprRA;
-  private final Map<Integer, Path> paletFilesMap;
 
-  private final Map<Integer, LS2Map> ls2Maps;
+  private Map<Integer, Path> paletFiles;
+  private int maxPaletId;
+
+  private Map<Integer, Path> ls2MapFiles;
+  private int maxLS2MapId;
 
   @Inject
   public SaResourcesManager(Settings settings, Kryo kryo) throws Exception {
     this.settings = settings;
     this.kryo = kryo;
 
-    resources = locateClientResources();
+    Map<ClientResource, Map<Integer, Path>> resources = locateClientResources();
     try(InputStream is = Files.newInputStream(resources.get(ClientResource.ADRN).values().iterator().next())) {
       Adrn adrn = kryo.readObject(new Input(is), Adrn.class);
       maxAdrnId = indexAdrns(adrn);
@@ -57,10 +58,11 @@ public class SaResourcesManager {
     }
     realRA = FileChannel.open(resources.get(ClientResource.REAL).values().iterator().next());
     sprRA = FileChannel.open(resources.get(ClientResource.SPR).values().iterator().next());
-    paletFilesMap = resources.get(ClientResource.PALET);
+
+    indexPalets(resources);
 
     Path gmsvDataPath = settings.getGmsvDataPath();
-    ls2Maps = indexLs2Maps(gmsvDataPath, kryo);
+    indexLS2Maps(gmsvDataPath, kryo);
   }
 
   @PreDestroy
@@ -188,22 +190,33 @@ public class SaResourcesManager {
     return blocks;
   }
 
+  private void indexPalets(Map<ClientResource, Map<Integer, Path>> resources) {
+    paletFiles = resources.get(ClientResource.PALET);
+    for(int id : paletFiles.keySet())
+      if(id > maxPaletId)
+        maxPaletId = id;
+  }
+
+  public int getMaxPaletId() {
+    return maxPaletId;
+  }
+
   public Palet getPalet(int id) {
-    Path paletFile = paletFilesMap.get(id);
-    if(paletFile == null)
-      return null;
-    Palet palet = new Palet();
-    try {
-      palet.setData(Files.readAllBytes(paletFile));
+    Path file = paletFiles.get(id);
+    if(file == null)
+      throw new IllegalArgumentException("Cannot find Palet: " + id);
+    try(InputStream stream = Files.newInputStream(file)) {
+      Input input = new Input(stream);
+      return kryo.readObject(input, Palet.class);
     } catch(IOException e) {
       throw new RuntimeException(e);
     }
-    return palet;
   }
 
-  public static Map<Integer, LS2Map> indexLs2Maps(Path gmsvDataPath, final Kryo kryo) throws IOException {
+  private void indexLS2Maps(Path gmsvDataPath, final Kryo kryo) throws IOException {
     Path mapDir = gmsvDataPath.resolve("map");
-    final Map<Integer, LS2Map> maps = new HashMap<>();
+    final LS2Map.MapHeaderSerializer headerSerializer = new LS2Map.MapHeaderSerializer();
+    ls2MapFiles = new HashMap<>();
     Files.walkFileTree(mapDir, new SimpleFileVisitor<Path>() {
       @Override
       public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
@@ -212,10 +225,13 @@ public class SaResourcesManager {
 
       @Override
       public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-        try(InputStream is = Files.newInputStream(file)) {
+        try(InputStream stream = Files.newInputStream(file)) {
           try {
-            LS2Map ls2Map = kryo.readObject(new Input(is), LS2Map.class);
-            maps.put(ls2Map.getId(), ls2Map);
+            LS2Map ls2Map = kryo.readObject(new Input(stream), LS2Map.class, headerSerializer);
+            int id = ls2Map.getId();
+            ls2MapFiles.put(id, file);
+            if(id > maxLS2MapId)
+              maxLS2MapId = id;
           } catch(IllegalArgumentException e) {
             log.debug("Invalid map file: " + file, e);
           }
@@ -223,10 +239,22 @@ public class SaResourcesManager {
         return FileVisitResult.CONTINUE;
       }
     });
-    return maps;
   }
 
-  public Map<Integer, LS2Map> getLs2Maps() {
-    return ls2Maps;
+  public int getMaxLS2MapId() {
+    return maxLS2MapId;
   }
+
+  public LS2Map getLS2Map(int id) {
+    Path file = ls2MapFiles.get(id);
+    if(file == null)
+      throw new IllegalArgumentException("Cannot find LS2MAP: " + id);
+    try(InputStream stream = Files.newInputStream(file)) {
+      Input input = new Input(stream);
+      return kryo.readObject(input, LS2Map.class);
+    } catch(IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
 }
