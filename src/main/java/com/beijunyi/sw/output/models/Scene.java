@@ -13,6 +13,46 @@ public class Scene implements KryoSerializable {
   private int[] tiles;
   private int[] objects;
 
+  public String getName() {
+    return name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  public short getEast() {
+    return east;
+  }
+
+  public void setEast(short east) {
+    this.east = east;
+  }
+
+  public short getSouth() {
+    return south;
+  }
+
+  public void setSouth(short south) {
+    this.south = south;
+  }
+
+  public int[] getTiles() {
+    return tiles;
+  }
+
+  public void setTiles(int[] tiles) {
+    this.tiles = tiles;
+  }
+
+  public int[] getObjects() {
+    return objects;
+  }
+
+  public void setObjects(int[] objects) {
+    this.objects = objects;
+  }
+
   @Override
   public void write(Kryo kryo, Output output) {
     byte[] nameBytes = name.getBytes();

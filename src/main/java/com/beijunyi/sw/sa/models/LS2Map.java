@@ -1,7 +1,5 @@
 package com.beijunyi.sw.sa.models;
 
-import java.io.UnsupportedEncodingException;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.beijunyi.sw.utils.BitConverter;
@@ -13,12 +11,10 @@ import com.esotericsoftware.kryo.io.Output;
 
 public class LS2Map implements KryoSerializable {
 
-  private static final Pattern NAME_PATTERN = Pattern.compile("^((\\p{L})*)\\|*\u0000*.*$");
-
   private short east;
   private short south;
   private int id;
-  private String name;
+  private byte[] name;
   private int[] tiles;
   private int[] objects;
 
@@ -34,7 +30,7 @@ public class LS2Map implements KryoSerializable {
     return id;
   }
 
-  public String getName() {
+  public byte[] getName() {
     return name;
   }
 
@@ -55,14 +51,7 @@ public class LS2Map implements KryoSerializable {
   public void read(Kryo kryo, Input input) {
     input.skip(6);
     id = BitConverter.uint16be(input.readBytes(2));
-    try {
-      String rawName = new String(input.readBytes(32), "gbk");
-      Matcher matcher = NAME_PATTERN.matcher(rawName);
-      if(matcher.matches())
-        name = matcher.group(1);
-    } catch(UnsupportedEncodingException e) {
-      throw new RuntimeException(e);
-    }
+    name = input.readBytes(32);
     east = (short) BitConverter.uint16be(input.readBytes(2));
     south = (short) BitConverter.uint16be(input.readBytes(2));
     int total = east * south;
