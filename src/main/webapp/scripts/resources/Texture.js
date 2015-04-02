@@ -1,5 +1,6 @@
 app.factory('Texture', function() {
   return function(data) {
+    data = new DataView(data);
     var pos = 0;
     this.x = data.getInt16(pos);
     pos += 2;

@@ -1,12 +1,24 @@
 app.factory('Scene', function() {
   return function(data) {
+    data = new DataView(data);
     var pos = 0;
-    var nameLength = new DataView(data.slice(pos, ++pos)).getUint8(0);
-    this.name = new TextDecoder().decode(new DataView(data.slice(pos, pos += nameLength)));
-    this.east = new DataView(data.slice(pos, pos += 2)).getUint16(0);
-    this.south = new DataView(data.slice(pos, pos += 2)).getUint16(0);
+    var nameLength = data.getUint8(pos++);
+    this.name = new TextDecoder().decode(data.slice(pos, pos += nameLength));
+    this.east = data.getUint16(pos);
+    pos += 2;
+    this.south = data.getUint16(pos);
+    pos += 2;
     var total = this.east * this.south;
-    this.tiles = new Uint32Array(data.slice(pos, pos += total * 4));
-    this.objects = new Uint32Array(data.slice(pos, pos + total * 4));
+    this.tiles = [];
+    var i;
+    for(i = 0; i < total; i++) {
+      this.tiles.push(data.getUint32(pos));
+      pos += 4;
+    }
+    this.objects = [];
+    for(i = 0; i < total; i++) {
+      this.objects.push(data.getUint32(pos));
+      pos += 4;
+    }
   };
 });
