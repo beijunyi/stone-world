@@ -13,8 +13,12 @@ app.service('SceneService', function($q, ResourcesService) {
       active = id;
     },
 
+    move: function() {
+
+    },
+
     getScene: function() {
-      return scene[active];
+      return scenes[active];
     }
   }
 });
