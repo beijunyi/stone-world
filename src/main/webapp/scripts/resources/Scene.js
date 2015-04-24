@@ -1,9 +1,9 @@
 app.factory('Scene', function() {
-  return function(data) {
-    data = new DataView(data);
+  return function(raw) {
+    data = new DataView(raw);
     var pos = 0;
     var nameLength = data.getUint8(pos++);
-    this.name = new TextDecoder().decode(data.slice(pos, pos += nameLength));
+    this.name = new TextDecoder().decode(raw.slice(pos, pos += nameLength));
     this.east = data.getUint16(pos);
     pos += 2;
     this.south = data.getUint16(pos);
