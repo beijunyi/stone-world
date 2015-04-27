@@ -1,6 +1,6 @@
-app.service('SceneConstants', function() {
-  return function() {
-    this.BUFFER_RADIUS   = 10;
-    this.RENDER_RADIUS   =  5;
+app.factory('SceneConstants', function() {
+  return {
+    BUFFER_RADIUS   : 10,
+    RENDER_RADIUS   :  5
   };
 });

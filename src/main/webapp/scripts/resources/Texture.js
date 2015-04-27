@@ -10,6 +10,6 @@ app.factory('Texture', function() {
     pos += 2;
     this.height = data.getUint16(pos);
     pos += 2;
-    this.bitmap = new Uint8Array(pos, this.width * this.height);
+    this.bitmap = new Uint8Array(this.width * this.height, pos);
   };
 });

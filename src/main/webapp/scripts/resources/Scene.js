@@ -10,15 +10,31 @@ app.factory('Scene', function() {
     pos += 2;
     var total = this.east * this.south;
     this.tiles = [];
-    var i;
-    for(i = 0; i < total; i++) {
-      this.tiles.push(data.getUint32(pos));
+    var i, s, e, row;
+    for(i = 0, s = 0, e = 0; i < total; i++) {
+      if(e == 0) {
+        row = [];
+        this.tiles.push(row);
+      }
+      row.push(data.getUint32(pos));
       pos += 4;
+      if(++e == this.east) {
+        e = 0;
+        s++;
+      }
     }
     this.objects = [];
-    for(i = 0; i < total; i++) {
-      this.objects.push(data.getUint32(pos));
+    for(i = 0, s = 0, e = 0; i < total; i++) {
+      if(e == 0) {
+        row = [];
+        this.objects.push(row);
+      }
+      row.push(data.getUint32(pos));
       pos += 4;
+      if(++e == this.east) {
+        e = 0;
+        s++;
+      }
     }
   };
 });

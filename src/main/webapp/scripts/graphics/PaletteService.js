@@ -1,4 +1,4 @@
-app.service('PalettesService', function($q, ResourcesService) {
+app.service('PaletteService', function($q, ResourcesService) {
 
   var active = null;
   var palettes = {};

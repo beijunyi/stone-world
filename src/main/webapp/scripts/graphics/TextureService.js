@@ -8,19 +8,16 @@ app.service('TextureService', function($q, Canvas, ResourcesService, TrafficCons
       return cache[id] != null && cache[id] != false;
     },
 
-    prepareTexture: function(ids) {
-      angular.forEach(ids, function(id) {
-        if(cache[id] == null) {
-          cache[id] = false;
-          TrafficService.enqueue(TrafficConstants.TEXTURE, id);
-          ResourcesService.texture(id).then(function(texture) {
-            var canvas = new Canvas(texture);
-            cache[id] = PIXI.Texture.fromCanvas(canvas);
-            TrafficService.dequeue(TrafficConstants.TEXTURE, id)
-          });
-        }
-      });
+    prepareTexture: function(id) {
+      if(cache[id] == null) {
+        cache[id] = false;
+        TrafficService.enqueue(TrafficConstants.TEXTURE, id);
+        ResourcesService.texture(id).then(function(texture) {
+          var canvas = new Canvas(texture);
+          cache[id] = PIXI.Texture.fromCanvas(canvas);
+          TrafficService.dequeue(TrafficConstants.TEXTURE, id)
+        });
+      }
     }
-
   }
 });

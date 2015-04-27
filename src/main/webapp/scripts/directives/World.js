@@ -1,4 +1,4 @@
-app.directive('world', function(ResourcesService, PalettesService, SceneService, TrafficService, TrafficConstants) {
+app.directive('world', function(ResourcesService, PaletteService, SceneService, TrafficService, TrafficConstants) {
   return {
     restrict: 'E',
     scope: {
@@ -7,7 +7,7 @@ app.directive('world', function(ResourcesService, PalettesService, SceneService,
     controller: function($scope) {
     },
     link: function($scope, $element) {
-      PalettesService.preparePalette(1);
+      PaletteService.preparePalette(1);
       SceneService.prepareScene(2000);
       TrafficService.waitFor(TrafficConstants.SCENES_ONLY, function() {
         SceneService.move(100, 100);
