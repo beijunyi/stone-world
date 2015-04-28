@@ -1,0 +1,7 @@
+.idea/*
+out/*
+build/*
+target/*
+META-INF/*
+*.iml
+*.ipr
