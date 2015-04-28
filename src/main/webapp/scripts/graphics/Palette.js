@@ -1,7 +1,7 @@
-app.factory('Palette', function(ResourceLoader, TrafficService, TrafficConstants, PaletteConstants) {
+app.factory('Palette', function(ResourceApi, TrafficService, TrafficConstants, PaletteConstants) {
   var colors = false;
   TrafficService.enqueue(TrafficConstants.PALETTE, PaletteConstants.PALETTE_ID);
-  ResourceLoader.palette(PaletteConstants.PALETTE_ID).then(function(raw) {
+  ResourceApi.palette(PaletteConstants.PALETTE_ID).then(function(raw) {
     colors = [];
     var data = new Uint8Array(raw);
     for(var i = 0; i < 256; i++) {

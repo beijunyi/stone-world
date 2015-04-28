@@ -1,4 +1,4 @@
-app.directive('world', function(SceneService, TrafficService, TrafficConstants) {
+app.directive('world', function(SceneLoader, TrafficService, TrafficConstants) {
   return {
     restrict: 'E',
     scope: {
@@ -7,9 +7,9 @@ app.directive('world', function(SceneService, TrafficService, TrafficConstants) 
     controller: function($scope) {
     },
     link: function($scope, $element) {
-      SceneService.prepareScene(2000);
+      SceneLoader.prepareScene(2000);
       TrafficService.waitFor(TrafficConstants.SCENES_ONLY, function() {
-        SceneService.move(100, 100);
+        SceneLoader.move(100, 100);
       });
       TrafficService.waitFor(TrafficConstants.ALL_TYPES, function() {
         console.log('hi');

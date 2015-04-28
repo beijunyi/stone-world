@@ -1,23 +1,25 @@
-app.service('ResourceLoader', function($http, $q) {
+app.service('ResourceApi', function($http, $q) {
 
+  var prefix = '/api/resources/';
+  
   return {
     palette: function(id) {
       var deferred = $q.defer();
-      $http.get('/api/resources/palette/' + id + ".bin", {responseType: "arraybuffer"}).success(function(data) {
+      $http.get(prefix + 'palette/' + id + '.bin', {responseType: 'arraybuffer'}).success(function(data) {
         deferred.resolve(data);
       });
       return deferred.promise;
     },
     scene: function(id) {
       var deferred = $q.defer();
-      $http.get('/api/resources/scene/' + id + ".bin", {responseType: "arraybuffer"}).success(function(data) {
+      $http.get(prefix + 'scene/' + id + '.bin', {responseType: 'arraybuffer'}).success(function(data) {
         deferred.resolve(data);
       });
       return deferred.promise;
     },
     texture: function(id) {
       var deferred = $q.defer();
-      $http.get('/api/resources/texture/' + id + ".bin", {responseType: "arraybuffer"}).success(function(data) {
+      $http.get(prefix + 'texture/' + id + '.bin', {responseType: 'arraybuffer'}).success(function(data) {
         deferred.resolve(data);
       });
       return deferred.promise;

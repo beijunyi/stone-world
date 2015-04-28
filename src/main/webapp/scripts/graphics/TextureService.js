@@ -1,4 +1,4 @@
-app.service('TextureService', function($q, Texture, ResourceLoader, TrafficConstants, TrafficService) {
+app.service('TextureService', function($q, Texture, ResourceApi, TrafficConstants, TrafficService) {
 
   var cache = {};
 
@@ -12,7 +12,7 @@ app.service('TextureService', function($q, Texture, ResourceLoader, TrafficConst
       if(cache[id] == null) {
         cache[id] = false;
         TrafficService.enqueue(TrafficConstants.TEXTURE, id);
-        ResourceLoader.texture(id).then(function(raw) {
+        ResourceApi.texture(id).then(function(raw) {
           cache[id] = new Texture(raw);
           TrafficService.dequeue(TrafficConstants.TEXTURE, id)
         });

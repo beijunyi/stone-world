@@ -1,4 +1,4 @@
-app.service('SceneService', function($q, Scene, ResourceLoader, TextureService, TrafficService, SceneConstants, TrafficConstants) {
+app.service('SceneLoader', function($q, Scene, ResourceApi, TextureService, TrafficService, SceneConstants, TrafficConstants) {
 
   var active = null;
   var cache = {};
@@ -13,7 +13,7 @@ app.service('SceneService', function($q, Scene, ResourceLoader, TextureService, 
       if(cache[id] == null) {
         cache[id] = false;
         TrafficService.enqueue(TrafficConstants.SCENE, id);
-        ResourceLoader.scene(id).then(function(raw) {
+        ResourceApi.scene(id).then(function(raw) {
           cache[id] = new Scene(raw);
           TrafficService.dequeue(TrafficConstants.SCENE, id)
         });
