@@ -1,4 +1,4 @@
-app.service('TextureService', function($q, Canvas, ResourcesService, TrafficConstants, TrafficService) {
+app.service('TextureService', function($q, Texture, ResourceLoader, TrafficConstants, TrafficService) {
 
   var cache = {};
 
@@ -12,9 +12,8 @@ app.service('TextureService', function($q, Canvas, ResourcesService, TrafficCons
       if(cache[id] == null) {
         cache[id] = false;
         TrafficService.enqueue(TrafficConstants.TEXTURE, id);
-        ResourcesService.texture(id).then(function(texture) {
-          var canvas = new Canvas(texture);
-          cache[id] = PIXI.Texture.fromCanvas(canvas);
+        ResourceLoader.texture(id).then(function(raw) {
+          cache[id] = new Texture(raw);
           TrafficService.dequeue(TrafficConstants.TEXTURE, id)
         });
       }

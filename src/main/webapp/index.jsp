@@ -4,6 +4,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
   <base href="/">
   <meta charset="utf-8"/>
   <title>stone-world</title>
