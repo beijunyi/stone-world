@@ -5,7 +5,7 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.BinaryWebSocketHandler;
 
 
-public class WebSocketEndPoint1 extends BinaryWebSocketHandler {
+public class WebSocketEndPoint extends BinaryWebSocketHandler {
 
   @Override
   protected void handleBinaryMessage(WebSocketSession session, BinaryMessage message) throws Exception {
