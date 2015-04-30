@@ -12,11 +12,11 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 
 import com.beijunyi.sw.config.Settings;
-import com.beijunyi.sw.sa.models.*;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.beijunyi.sw.sa.models.*;
 
 @Named
 @Singleton

@@ -15,10 +15,9 @@ import javax.inject.Singleton;
 import com.beijunyi.sw.config.Settings;
 import com.beijunyi.sw.resources.models.Scene;
 import com.beijunyi.sw.sa.SaResourcesManager;
-import com.beijunyi.sw.sa.models.*;
 import com.esotericsoftware.kryo.Kryo;
-import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
+import com.beijunyi.sw.sa.models.LS2Map;
 
 @Named
 @Singleton

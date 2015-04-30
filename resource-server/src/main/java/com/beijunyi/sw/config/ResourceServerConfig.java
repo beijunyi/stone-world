@@ -13,7 +13,7 @@ import org.springframework.context.annotation.*;
 @Configuration
 @Import({KryoConfig.class})
 @ComponentScan(basePackages = "com.beijunyi.sw")
-public class RuntimeConfig {
+public class ResourceServerConfig {
 
   @Bean
   public CustomResourcesSettings getCustomResourcesSettings() throws IOException {

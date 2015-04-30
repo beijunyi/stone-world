@@ -1,7 +1,5 @@
 package com.beijunyi.sw.sa.models;
 
-import java.util.regex.Pattern;
-
 import com.beijunyi.sw.utils.BitConverter;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.KryoSerializable;
