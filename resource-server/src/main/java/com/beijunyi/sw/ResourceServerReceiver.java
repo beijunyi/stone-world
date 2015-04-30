@@ -37,7 +37,7 @@ public class ResourceServerReceiver implements Receiver {
 
   @Override
   public void receive(Message msg) {
-
+    System.out.println(msg);
   }
 
   @Override

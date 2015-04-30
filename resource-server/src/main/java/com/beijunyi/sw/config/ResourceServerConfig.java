@@ -6,13 +6,14 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import com.beijunyi.sw.config.custom.CustomResourcesSettings;
+import com.esotericsoftware.kryo.Kryo;
 import org.apache.commons.io.IOUtils;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.jgroups.JChannel;
 import org.springframework.context.annotation.*;
 
 @Configuration
-@Import({KryoConfig.class})
+@Import({})
 @ComponentScan(basePackages = "com.beijunyi.sw")
 public class ResourceServerConfig {
 
@@ -63,6 +64,13 @@ public class ResourceServerConfig {
     JChannel channel = new JChannel();
     channel.connect(System.getProperty("cluster.name", "stoneworld"));
     return channel;
+  }
+
+  @Bean
+  public Kryo getKryo() {
+    Kryo kryo = new Kryo();
+    kryo.setReferences(false);
+    return kryo;
   }
 
   @Bean

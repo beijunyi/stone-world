@@ -10,6 +10,7 @@
   <modules>
     <module>resource-server</module>
     <module>game-server</module>
+    <module>shared-models</module>
   </modules>
   <packaging>pom</packaging>
 
@@ -37,6 +38,12 @@
       <artifactId>javax.inject</artifactId>
       <version>${javax-inject-version}</version>
     </dependency>
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>javax.servlet-api</artifactId>
+      <version>3.1.0</version>
+      <scope>provided</scope>
+    </dependency>
 
     <dependency>
       <groupId>org.slf4j</groupId>
@@ -54,10 +61,17 @@
       <artifactId>spring-context</artifactId>
       <version>${springframework-version}</version>
     </dependency>
+
     <dependency>
       <groupId>org.jgroups</groupId>
       <artifactId>jgroups</artifactId>
       <version>${jgroups-version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.esotericsoftware.kryo</groupId>
+      <artifactId>kryo</artifactId>
+      <version>${kryo-version}</version>
     </dependency>
   </dependencies>
 
