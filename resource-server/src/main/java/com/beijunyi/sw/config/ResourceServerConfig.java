@@ -5,9 +5,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import javax.inject.Inject;
-
-import com.beijunyi.sw.ResourceServerReceiver;
 import com.beijunyi.sw.config.custom.CustomResourcesSettings;
 import org.apache.commons.io.IOUtils;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -18,9 +15,6 @@ import org.springframework.context.annotation.*;
 @Import({KryoConfig.class})
 @ComponentScan(basePackages = "com.beijunyi.sw")
 public class ResourceServerConfig {
-
-  @Inject
-  private ResourceServerReceiver receiver;
 
   @Bean
   public CustomResourcesSettings getCustomResourcesSettings() throws IOException {
@@ -66,7 +60,9 @@ public class ResourceServerConfig {
 
   @Bean
   public JChannel jChannel() throws Exception {
-    return new JChannel();
+    JChannel channel = new JChannel();
+    channel.connect(System.getProperty("cluster.name", "stoneworld"));
+    return channel;
   }
 
   @Bean

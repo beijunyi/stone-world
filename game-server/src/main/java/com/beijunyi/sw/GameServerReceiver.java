@@ -14,7 +14,6 @@ public class GameServerReceiver implements Receiver {
   @Inject
   public GameServerReceiver(JChannel channel) throws Exception {
     channel.setReceiver(this);
-    channel.connect(System.getProperty("cluster.name", "stoneworld"));
   }
 
   @Override

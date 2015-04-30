@@ -13,7 +13,6 @@ public class ResourceServerReceiver implements Receiver {
   @Inject
   public ResourceServerReceiver(JChannel channel) throws Exception {
     channel.setReceiver(this);
-    channel.connect(System.getProperty("cluster.name", "stoneworld"));
   }
 
   @Override
