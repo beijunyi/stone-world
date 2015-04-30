@@ -5,15 +5,22 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import javax.inject.Inject;
+
+import com.beijunyi.sw.ResourceServerReceiver;
 import com.beijunyi.sw.config.custom.CustomResourcesSettings;
 import org.apache.commons.io.IOUtils;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.jgroups.JChannel;
 import org.springframework.context.annotation.*;
 
 @Configuration
 @Import({KryoConfig.class})
 @ComponentScan(basePackages = "com.beijunyi.sw")
 public class ResourceServerConfig {
+
+  @Inject
+  private ResourceServerReceiver receiver;
 
   @Bean
   public CustomResourcesSettings getCustomResourcesSettings() throws IOException {
@@ -55,6 +62,11 @@ public class ResourceServerConfig {
     settings.setOutputPath(outputPath);
 
     return settings;
+  }
+
+  @Bean
+  public JChannel jChannel() throws Exception {
+    return new JChannel();
   }
 
   @Bean
