@@ -1,38 +1,44 @@
-package com.beijunyi.sw;
+package com.beijunyi.sw.service;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
-
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import com.beijunyi.sw.config.model.ServerProperties;
-import com.beijunyi.sw.model.GameServerReady;
+import com.beijunyi.sw.model.resourceserver.ResourceServerOffline;
+import com.beijunyi.sw.model.resourceserver.ResourceServerOnline;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Output;
 import org.jgroups.*;
 
 @Named
-public class GameServerReceiver implements Receiver {
+public class ResourceServerReceiver implements Receiver {
 
   private final JChannel channel;
   private final Kryo kryo;
-  private final ServerProperties props;
 
   @Inject
-  public GameServerReceiver(JChannel channel, Kryo kryo, ServerProperties props) throws Exception {
+  public ResourceServerReceiver(JChannel channel, @Named("KryoRef") Kryo kryo) throws Exception {
     this.channel = channel;
     this.kryo = kryo;
-    this.props = props;
     channel.setReceiver(this);
   }
 
   @PostConstruct
-  public void notifyCluster() throws Exception {
+  public void notifyOnline() throws Exception {
     try(ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-      kryo.writeObject(new Output(out), new GameServerReady(props.getIp(), props.getPort()));
+      kryo.writeObject(new Output(out), new ResourceServerOnline());
+      channel.send(null, out.toByteArray());
+    }
+  }
+
+  @PreDestroy
+  public void notifyOffline() throws Exception {
+    try(ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+      kryo.writeObject(new Output(out), new ResourceServerOffline());
       channel.send(null, out.toByteArray());
     }
   }
@@ -59,7 +65,7 @@ public class GameServerReceiver implements Receiver {
 
   @Override
   public void receive(Message msg) {
-
+    System.out.println(msg);
   }
 
   @Override

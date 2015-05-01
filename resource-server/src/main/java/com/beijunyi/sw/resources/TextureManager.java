@@ -28,7 +28,7 @@ public class TextureManager {
   private Map<Integer, byte[]> textures = new HashMap<>();
 
   @Inject
-  public TextureManager(Settings settings, SaResourcesManager srm, Kryo kryo) throws IOException {
+  public TextureManager(Settings settings, SaResourcesManager srm, @Named("KryoNoRef") Kryo kryo) throws IOException {
     this.srm = srm;
     this.kryo = kryo;
     texturesDir = settings.getOutputPath().resolve("textures");

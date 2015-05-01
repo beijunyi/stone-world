@@ -1,21 +1,21 @@
-package com.beijunyi.sw.model;
+package com.beijunyi.sw.model.gameserver;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.KryoSerializable;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 
-public class GameServerReady implements KryoSerializable {
+public final class GameServerOnline implements KryoSerializable {
 
   private String ip;
   private int port;
 
-  public GameServerReady(String ip, int port) {
+  public GameServerOnline(String ip, int port) {
     this.ip = ip;
     this.port = port;
   }
 
-  public GameServerReady() {
+  public GameServerOnline() {
   }
 
   public String getIp() {

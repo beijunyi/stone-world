@@ -5,15 +5,15 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import com.beijunyi.sw.AppConstants;
 import com.beijunyi.sw.config.custom.CustomResourcesSettings;
-import com.esotericsoftware.kryo.Kryo;
 import org.apache.commons.io.IOUtils;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.jgroups.JChannel;
 import org.springframework.context.annotation.*;
 
 @Configuration
-@Import({})
+@Import({KryoConfig.class})
 @ComponentScan(basePackages = "com.beijunyi.sw")
 public class ResourceServerConfig {
 
@@ -62,15 +62,8 @@ public class ResourceServerConfig {
   @Bean
   public JChannel jChannel() throws Exception {
     JChannel channel = new JChannel();
-    channel.connect(System.getProperty("cluster.name", "stoneworld"));
+    channel.connect(System.getProperty("cluster.name", AppConstants.DEFAULT_CLUSTER));
     return channel;
-  }
-
-  @Bean
-  public Kryo getKryo() {
-    Kryo kryo = new Kryo();
-    kryo.setReferences(false);
-    return kryo;
   }
 
   @Bean

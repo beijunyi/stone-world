@@ -33,7 +33,7 @@ public class SceneManager {
   private Map<Integer, byte[]> scenes = new HashMap<>();
 
   @Inject
-  public SceneManager(Settings settings, SaResourcesManager srm, Kryo kryo) throws IOException {
+  public SceneManager(Settings settings, SaResourcesManager srm, @Named("KryoNoRef") Kryo kryo) throws IOException {
     this.srm = srm;
     this.kryo = kryo;
     scenesDir = settings.getOutputPath().resolve("scenes");

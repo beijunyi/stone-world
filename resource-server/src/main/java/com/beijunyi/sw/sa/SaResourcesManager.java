@@ -43,7 +43,7 @@ public class SaResourcesManager {
   private int maxLS2MapId;
 
   @Inject
-  public SaResourcesManager(Settings settings, Kryo kryo) throws Exception {
+  public SaResourcesManager(Settings settings, @Named("KryoNoRef") Kryo kryo) throws Exception {
     this.settings = settings;
     this.kryo = kryo;
 
