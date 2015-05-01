@@ -17,7 +17,9 @@ public class MessageSerializer {
 
   public byte[] getByteArray(MessageModel model) {
     try(ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-      kryo.writeObject(new Output(out), model);
+      Output output = new Output(out);
+      kryo.writeClassAndObject(output, model);
+      output.close();
       return out.toByteArray();
     } catch(IOException e) {
       throw new RuntimeException(e);
@@ -26,7 +28,7 @@ public class MessageSerializer {
 
   public MessageModel readMessage(byte[] bytes) {
     try(Input input = new Input(bytes)) {
-      return kryo.readObject(input, MessageModel.class);
+      return (MessageModel) kryo.readClassAndObject(input);
     }
   }
 }

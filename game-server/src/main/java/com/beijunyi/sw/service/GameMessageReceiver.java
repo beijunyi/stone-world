@@ -10,6 +10,7 @@ import com.beijunyi.sw.message.MessageModel;
 import com.beijunyi.sw.message.MessageSerializer;
 import com.beijunyi.sw.message.gameserver.GameServerOffline;
 import com.beijunyi.sw.message.gameserver.GameServerOnline;
+import com.beijunyi.sw.message.resourceserver.ResourceServerOnline;
 import org.jgroups.*;
 
 @Named
@@ -44,7 +45,13 @@ public class GameMessageReceiver extends ReceiverAdapter {
   }
 
   public void handleRequest(MessageModel message, Address src) {
-
+    try {
+      if(message instanceof ResourceServerOnline) {
+        channel.send(src, serializer.getByteArray(new GameServerOnline(props.getIp(), props.getPort())));
+      }
+    } catch(Exception e) {
+      throw new RuntimeException(e);
+    }
   }
 
 }
