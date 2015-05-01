@@ -1,6 +1,7 @@
 package com.beijunyi.sw.resources;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -15,9 +16,9 @@ import javax.inject.Singleton;
 import com.beijunyi.sw.config.Settings;
 import com.beijunyi.sw.resources.models.Scene;
 import com.beijunyi.sw.sa.SaResourcesManager;
+import com.beijunyi.sw.sa.models.LS2Map;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Output;
-import com.beijunyi.sw.sa.models.LS2Map;
 
 @Named
 @Singleton
@@ -33,7 +34,7 @@ public class SceneManager {
   private Map<Integer, byte[]> scenes = new HashMap<>();
 
   @Inject
-  public SceneManager(Settings settings, SaResourcesManager srm, @Named("KryoNoRef") Kryo kryo) throws IOException {
+  public SceneManager(Settings settings, SaResourcesManager srm, Kryo kryo) throws IOException {
     this.srm = srm;
     this.kryo = kryo;
     scenesDir = settings.getOutputPath().resolve("scenes");

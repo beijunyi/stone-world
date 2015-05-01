@@ -1,6 +1,8 @@
 package com.beijunyi.sw.sa;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.*;
@@ -12,11 +14,11 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 
 import com.beijunyi.sw.config.Settings;
+import com.beijunyi.sw.sa.models.*;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.beijunyi.sw.sa.models.*;
 
 @Named
 @Singleton
@@ -43,7 +45,7 @@ public class SaResourcesManager {
   private int maxLS2MapId;
 
   @Inject
-  public SaResourcesManager(Settings settings, @Named("KryoNoRef") Kryo kryo) throws Exception {
+  public SaResourcesManager(Settings settings, Kryo kryo) throws Exception {
     this.settings = settings;
     this.kryo = kryo;
 

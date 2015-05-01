@@ -1,11 +1,11 @@
-package com.beijunyi.sw.model.gameserver;
+package com.beijunyi.sw.message.gameserver;
 
+import com.beijunyi.sw.message.MessageModel;
 import com.esotericsoftware.kryo.Kryo;
-import com.esotericsoftware.kryo.KryoSerializable;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 
-public final class GameServerOffline implements KryoSerializable {
+public final class GameServerOffline implements MessageModel {
 
   @Override
   public void write(Kryo kryo, Output output) {

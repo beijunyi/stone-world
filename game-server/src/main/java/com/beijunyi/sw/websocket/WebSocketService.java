@@ -5,6 +5,6 @@ import javax.inject.Named;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 @Named
-public class GameRequestHandler extends TextWebSocketHandler {
+public class WebSocketService extends TextWebSocketHandler {
 
 }

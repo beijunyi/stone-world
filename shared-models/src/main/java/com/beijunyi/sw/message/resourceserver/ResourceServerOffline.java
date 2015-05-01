@@ -1,11 +1,11 @@
-package com.beijunyi.sw.model.resourceserver;
+package com.beijunyi.sw.message.resourceserver;
 
+import com.beijunyi.sw.message.MessageModel;
 import com.esotericsoftware.kryo.Kryo;
-import com.esotericsoftware.kryo.KryoSerializable;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 
-public final class ResourceServerOnline implements KryoSerializable {
+public final class ResourceServerOffline implements MessageModel {
 
   @Override
   public void write(Kryo kryo, Output output) {

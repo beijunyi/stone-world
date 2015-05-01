@@ -1,6 +1,7 @@
 package com.beijunyi.sw.resources;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
@@ -68,7 +69,7 @@ public class PaletteManager {
   private Map<Integer, byte[]> palettes = new HashMap<>();
 
   @Inject
-  public PaletteManager(SaResourcesManager srm, @Named("KryoNoRef") Kryo kryo, Settings settings) throws IOException {
+  public PaletteManager(SaResourcesManager srm, Kryo kryo, Settings settings) throws IOException {
     this.srm = srm;
     this.kryo = kryo;
     palettesDir = settings.getOutputPath().resolve("palettes");
