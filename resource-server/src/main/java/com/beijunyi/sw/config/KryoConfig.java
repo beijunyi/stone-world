@@ -1,6 +1,5 @@
 package com.beijunyi.sw.config;
 
-import com.beijunyi.sw.message.MessageSerializer;
 import com.esotericsoftware.kryo.Kryo;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,11 +12,6 @@ public class KryoConfig {
     Kryo kryo = new Kryo();
     kryo.setReferences(false);
     return kryo;
-  }
-
-  @Bean
-  public MessageSerializer messageSerializer() {
-    return new MessageSerializer(kryo());
   }
 
 }

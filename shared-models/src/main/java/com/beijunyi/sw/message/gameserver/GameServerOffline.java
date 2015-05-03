@@ -1,17 +1,20 @@
 package com.beijunyi.sw.message.gameserver;
 
-import com.beijunyi.sw.message.MessageModel;
-import com.esotericsoftware.kryo.Kryo;
-import com.esotericsoftware.kryo.io.Input;
-import com.esotericsoftware.kryo.io.Output;
+public final class GameServerOffline extends GameServerMessage {
 
-public final class GameServerOffline implements MessageModel {
+  private String name;
 
-  @Override
-  public void write(Kryo kryo, Output output) {
+  public GameServerOffline(String name) {
+    this();
+    this.name = name;
   }
 
-  @Override
-  public void read(Kryo kryo, Input input) {
+  public GameServerOffline() {
+    super(GameServerMessageEnum.GAME_SERVER_OFFLINE);
   }
+
+  public String getName() {
+    return name;
+  }
+
 }

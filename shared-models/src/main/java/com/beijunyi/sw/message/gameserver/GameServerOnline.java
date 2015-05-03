@@ -1,21 +1,24 @@
 package com.beijunyi.sw.message.gameserver;
 
-import com.beijunyi.sw.message.MessageModel;
-import com.esotericsoftware.kryo.Kryo;
-import com.esotericsoftware.kryo.io.Input;
-import com.esotericsoftware.kryo.io.Output;
+public final class GameServerOnline extends GameServerMessage {
 
-public final class GameServerOnline implements MessageModel {
-
+  private String name;
   private String ip;
   private int port;
 
-  public GameServerOnline(String ip, int port) {
+  public GameServerOnline(String name, String ip, int port) {
+    this();
+    this.name = name;
     this.ip = ip;
     this.port = port;
   }
 
   public GameServerOnline() {
+    super(GameServerMessageEnum.GAME_SERVER_ONLINE);
+  }
+
+  public String getName() {
+    return name;
   }
 
   public String getIp() {
@@ -26,15 +29,4 @@ public final class GameServerOnline implements MessageModel {
     return port;
   }
 
-  @Override
-  public void write(Kryo kryo, Output output) {
-    output.writeString(ip);
-    output.writeInt(port);
-  }
-
-  @Override
-  public void read(Kryo kryo, Input input) {
-    ip = input.readString();
-    port = input.readInt();
-  }
 }

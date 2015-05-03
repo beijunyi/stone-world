@@ -1,12 +1,12 @@
 package com.beijunyi.sw.config;
 
 import com.beijunyi.sw.AppConstants;
-import com.beijunyi.sw.config.model.ServerProperties;
+import com.beijunyi.sw.config.model.GameServerProperties;
 import org.jgroups.JChannel;
 import org.springframework.context.annotation.*;
 
 @Configuration
-@Import({KryoConfig.class, WebMvcConfig.class})
+@Import({WebMvcConfig.class})
 @ComponentScan(basePackages = "com.beijunyi.sw")
 public class GameServerConfig {
 
@@ -18,8 +18,11 @@ public class GameServerConfig {
   }
 
   @Bean
-  public ServerProperties serverProperties() {
-    return new ServerProperties(System.getProperty("server.ip"), Integer.valueOf(System.getProperty("server.port")));
+  public GameServerProperties serverProperties() {
+    String ip = System.getProperty("server.ip");
+    int port = Integer.valueOf(System.getProperty("server.port"));
+    String name = System.getProperty("server.name", ip + ":" + port);
+    return new GameServerProperties(name, ip, port);
   }
 
 }

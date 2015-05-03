@@ -1,17 +1,9 @@
 package com.beijunyi.sw.message.resourceserver;
 
-import com.beijunyi.sw.message.MessageModel;
-import com.esotericsoftware.kryo.Kryo;
-import com.esotericsoftware.kryo.io.Input;
-import com.esotericsoftware.kryo.io.Output;
+public final class ResourceServerOffline extends ResourceServerMessage {
 
-public final class ResourceServerOffline implements MessageModel {
-
-  @Override
-  public void write(Kryo kryo, Output output) {
+  public ResourceServerOffline() {
+    super(ResourceServerMessageEnum.RESOURCE_SERVER_OFFLINE);
   }
 
-  @Override
-  public void read(Kryo kryo, Input input) {
-  }
 }
