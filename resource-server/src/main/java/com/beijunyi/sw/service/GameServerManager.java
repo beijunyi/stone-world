@@ -4,6 +4,7 @@ import java.util.*;
 import javax.inject.Named;
 
 import com.beijunyi.sw.service.model.GameServerStatus;
+import org.jgroups.Address;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,10 +16,10 @@ public class GameServerManager {
   private final List<GameServerStatus> gsStatuses = new LinkedList<>();
   private final Map<String, GameServerStatus> gsMaps = new HashMap<>();
 
-  public void addGameServer(String name, String ip, int port) {
+  public void addGameServer(String name, String ip, int port, Address address) {
     if(gsMaps.containsKey(name))
       throw new IllegalArgumentException();
-    GameServerStatus gss = new GameServerStatus(name, ip, port);
+    GameServerStatus gss = new GameServerStatus(name, ip, port, address);
     gsStatuses.add(gss);
     gsMaps.put(name, gss);
     log.info("Successfully registered Game Server: " + name);

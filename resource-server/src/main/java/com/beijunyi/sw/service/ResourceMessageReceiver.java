@@ -40,7 +40,7 @@ public class ResourceMessageReceiver extends ReceiverAdapter {
   public void receive(Message msg) {
     Object msgObj = msg.getObject();
     if(msgObj instanceof GameServerMessage) {
-      gsmHandler.handle((GameServerMessage) msgObj);
+      gsmHandler.handle((GameServerMessage) msgObj, msg.getSrc());
     }
   }
 
