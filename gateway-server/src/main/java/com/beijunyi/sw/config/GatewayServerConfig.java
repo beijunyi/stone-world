@@ -1,21 +1,30 @@
 package com.beijunyi.sw.config;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import com.beijunyi.sw.AppConstants;
 import com.beijunyi.sw.config.custom.CustomResourcesSettings;
+import com.esotericsoftware.kryo.Kryo;
 import org.apache.commons.io.IOUtils;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.jgroups.JChannel;
 import org.springframework.context.annotation.*;
 
 @Configuration
-@Import({KryoConfig.class})
+@Import({GatewayServerSecurityConfig.class})
 @ComponentScan(basePackages = "com.beijunyi.sw")
-public class ResourceServerConfig {
+public class GatewayServerConfig {
+
+  @Bean
+  public Kryo kryo() {
+    Kryo kryo = new Kryo();
+    kryo.setReferences(false);
+    return kryo;
+  }
 
   @Bean
   public CustomResourcesSettings getCustomResourcesSettings() throws IOException {

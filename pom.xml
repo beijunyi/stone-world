@@ -21,12 +21,15 @@
     <jawr-version>3.5.2</jawr-version>
     <maven-war-plugin-version>2.4</maven-war-plugin-version>
 
-    <springframework-version>4.1.1.RELEASE</springframework-version>
+    <springframework-version>4.1.6.RELEASE</springframework-version>
 
     <javax-inject-version>1</javax-inject-version>
     <slf4j-version>1.7.7</slf4j-version>
 
     <jgroups-version>3.6.3.Final</jgroups-version>
+    <hibernate.version>4.3.9.Final</hibernate.version>
+    <h2.version>1.4.187</h2.version>
+
     <resteasy-version>3.0.9.Final</resteasy-version>
     <kryo-version>2.24.0</kryo-version>
     <commons-lang-version>2.6</commons-lang-version>
@@ -72,6 +75,17 @@
       <groupId>com.esotericsoftware.kryo</groupId>
       <artifactId>kryo</artifactId>
       <version>${kryo-version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.h2database</groupId>
+      <artifactId>h2</artifactId>
+      <version>${h2.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.hibernate</groupId>
+      <artifactId>hibernate-core</artifactId>
+      <version>${hibernate.version}</version>
     </dependency>
   </dependencies>
 

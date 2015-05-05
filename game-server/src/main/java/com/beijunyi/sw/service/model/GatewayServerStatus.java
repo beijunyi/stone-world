@@ -2,11 +2,11 @@ package com.beijunyi.sw.service.model;
 
 import org.jgroups.Address;
 
-public class ResourceServerStatus {
+public class GatewayServerStatus {
 
   private final Address address;
 
-  public ResourceServerStatus(Address address) {
+  public GatewayServerStatus(Address address) {
     this.address = address;
   }
 

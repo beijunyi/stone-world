@@ -6,20 +6,20 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import com.beijunyi.sw.message.gameserver.GameServerMessage;
-import com.beijunyi.sw.message.resourceserver.ResourceServerOffline;
-import com.beijunyi.sw.message.resourceserver.ResourceServerOnline;
+import com.beijunyi.sw.message.gatewayserver.GatewayServerOffline;
+import com.beijunyi.sw.message.gatewayserver.GatewayServerOnline;
 import org.jgroups.JChannel;
 import org.jgroups.Message;
 import org.jgroups.ReceiverAdapter;
 
 @Named
-public class ResourceMessageReceiver extends ReceiverAdapter {
+public class GatewayMessageReceiver extends ReceiverAdapter {
 
   private final JChannel channel;
   private final GameServerMessageHandler gsmHandler;
 
   @Inject
-  public ResourceMessageReceiver(JChannel channel, GameServerMessageHandler gsmHandler) throws Exception {
+  public GatewayMessageReceiver(JChannel channel, GameServerMessageHandler gsmHandler) throws Exception {
     this.channel = channel;
     this.gsmHandler = gsmHandler;
     channel.setReceiver(this);
@@ -28,12 +28,12 @@ public class ResourceMessageReceiver extends ReceiverAdapter {
   @PostConstruct
   public void notifyOnline() throws Exception {
     channel.setReceiver(this);
-    channel.send(null, new ResourceServerOnline());
+    channel.send(null, new GatewayServerOnline());
   }
 
   @PreDestroy
   public void notifyOffline() throws Exception {
-    channel.send(null, new ResourceServerOffline());
+    channel.send(null, new GatewayServerOffline());
   }
 
   @Override
