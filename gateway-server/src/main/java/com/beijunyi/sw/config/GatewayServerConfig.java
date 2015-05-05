@@ -8,6 +8,7 @@ import java.nio.file.Paths;
 
 import com.beijunyi.sw.AppConstants;
 import com.beijunyi.sw.config.custom.CustomResourcesSettings;
+import com.beijunyi.sw.config.custom.Settings;
 import com.esotericsoftware.kryo.Kryo;
 import org.apache.commons.io.IOUtils;
 import org.codehaus.jackson.map.ObjectMapper;

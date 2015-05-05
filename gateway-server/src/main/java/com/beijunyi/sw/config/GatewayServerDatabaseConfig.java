@@ -31,19 +31,22 @@ public class GatewayServerDatabaseConfig {
 
   public GatewayServerDatabaseConfig() throws IOException {
     if(!Files.exists(DATABASE_PROPERTIES)) {
-      loadDefaultSetting();
+      loadDefaultSettings(cfg);
+      loadOverrideSettings(cfg);
       Files.createDirectories(DATABASE_PROPERTIES.getParent());
       try(OutputStream out = Files.newOutputStream(DATABASE_PROPERTIES)) {
         cfg.store(out, null);
       }
     } else {
+      loadDefaultSettings(cfg);
       try(InputStream in = Files.newInputStream(DATABASE_PROPERTIES)) {
         cfg.load(in);
       }
+      loadOverrideSettings(cfg);
     }
   }
 
-  private void loadDefaultSetting() {
+  private void loadDefaultSettings(Properties cfg) {
     cfg.setProperty(AvailableSettings.DRIVER, org.h2.Driver.class.getCanonicalName());
     cfg.setProperty(AvailableSettings.URL, "jdbc:h2:file:" + DATABASE_LOCATION);
     cfg.setProperty(AvailableSettings.USER, GatewayServerConstants.MODULE_NAME);
@@ -51,6 +54,23 @@ public class GatewayServerDatabaseConfig {
     cfg.setProperty(AvailableSettings.DIALECT, H2Dialect.class.getCanonicalName());
     cfg.setProperty(AvailableSettings.SHOW_SQL, Boolean.toString(true));
     cfg.setProperty(AvailableSettings.HBM2DDL_AUTO, "update");
+  }
+
+  private void loadOverrideSettings(Properties cfg) {
+    Properties argCfg = System.getProperties();
+    String[] keys = new String[] {
+                                   AvailableSettings.DRIVER,
+                                   AvailableSettings.URL,
+                                   AvailableSettings.USER,
+                                   AvailableSettings.PASS,
+                                   AvailableSettings.DIALECT,
+                                   AvailableSettings.SHOW_SQL,
+                                   AvailableSettings.HBM2DDL_AUTO
+    };
+    for(String key : keys) {
+      if(argCfg.containsKey(key))
+        cfg.setProperty(key, argCfg.getProperty(key));
+    }
   }
 
   @Bean

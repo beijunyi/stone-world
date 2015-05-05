@@ -10,7 +10,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
-import com.beijunyi.sw.config.Settings;
+import com.beijunyi.sw.config.custom.Settings;
 import com.beijunyi.sw.resources.models.Palette;
 import com.beijunyi.sw.sa.SaResourcesManager;
 import com.beijunyi.sw.sa.models.Palet;

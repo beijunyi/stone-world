@@ -1,4 +1,4 @@
-package com.beijunyi.sw.config;
+package com.beijunyi.sw.config.custom;
 
 import java.nio.file.Path;
 
