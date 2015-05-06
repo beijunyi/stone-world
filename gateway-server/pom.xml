@@ -9,7 +9,7 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>resource-server</artifactId>
+  <artifactId>gateway-server</artifactId>
   <packaging>war</packaging>
 
   <properties>

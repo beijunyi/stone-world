@@ -8,7 +8,7 @@
   <artifactId>stoneworld</artifactId>
   <version>1.0-SNAPSHOT</version>
   <modules>
-    <module>resource-server</module>
+    <module>gateway-server</module>
     <module>game-server</module>
     <module>shared-models</module>
   </modules>
