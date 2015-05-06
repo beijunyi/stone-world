@@ -13,7 +13,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
-import com.beijunyi.sw.config.custom.Settings;
+import com.beijunyi.sw.config.GatewayServerResourceConfig;
 import com.beijunyi.sw.sa.models.*;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
@@ -26,7 +26,6 @@ public class SaResourcesManager {
 
   private static final Logger log = LoggerFactory.getLogger(SaResourcesManager.class);
 
-  private final Settings settings;
   private final Kryo kryo;
 
   private final Map<Integer, AdrnBlock> idAdrnMap = new HashMap<>();
@@ -45,13 +44,12 @@ public class SaResourcesManager {
   private int maxLS2MapId;
 
   @Inject
-  public SaResourcesManager(Settings settings, Kryo kryo) throws Exception {
-    this.settings = settings;
+  public SaResourcesManager(@Named("resource-properties") Properties props, Kryo kryo) throws Exception {
     this.kryo = kryo;
 
-    Path clientDataPath = settings.getSaDataPath();
+    Path saDataDir = Paths.get(props.getProperty(GatewayServerResourceConfig.SA_DATA_PROPERTY_KEY));
 
-    Map<ClientResource, Map<Integer, Path>> resources = locateClientResources();
+    Map<ClientResource, Map<Integer, Path>> resources = locateClientResources(saDataDir);
     try(InputStream is = Files.newInputStream(resources.get(ClientResource.ADRN).values().iterator().next())) {
       Adrn adrn = kryo.readObject(new Input(is), Adrn.class);
       maxAdrnId = indexAdrns(adrn);
@@ -63,10 +61,10 @@ public class SaResourcesManager {
     realRA = FileChannel.open(resources.get(ClientResource.REAL).values().iterator().next());
     sprRA = FileChannel.open(resources.get(ClientResource.SPR).values().iterator().next());
 
-    indexPalets(clientDataPath);
+    indexPalets(saDataDir);
 
-    Path gmsvDataPath = settings.getGmsvDataPath();
-    indexLS2Maps(gmsvDataPath, kryo);
+    Path gmsvDataDir = Paths.get(props.getProperty(GatewayServerResourceConfig.GMSV_DATA_PROPERTY_KEY));
+    indexLS2Maps(gmsvDataDir, kryo);
   }
 
   @PreDestroy
@@ -75,9 +73,8 @@ public class SaResourcesManager {
     sprRA.close();
   }
 
-  private Map<ClientResource, Map<Integer, Path>> locateClientResources() throws IOException {
+  private Map<ClientResource, Map<Integer, Path>> locateClientResources(Path saDataDir) throws IOException {
     Map<ClientResource, Map<Integer, Path>> resources = new HashMap<>();
-    Path saDataDir = settings.getSaDataPath();
     try(DirectoryStream<Path> files = Files.newDirectoryStream(saDataDir)) {
       for(Path file : files) {
         for(ClientResource type : ClientResource.values()) {

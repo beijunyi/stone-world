@@ -4,12 +4,14 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import com.beijunyi.sw.config.custom.Settings;
+import com.beijunyi.sw.config.GatewayServerResourceConfig;
 import com.beijunyi.sw.resources.models.Texture;
 import com.beijunyi.sw.sa.SaResourcesManager;
 import com.beijunyi.sw.sa.models.AdrnBlock;
@@ -29,10 +31,10 @@ public class TextureManager {
   private Map<Integer, byte[]> textures = new HashMap<>();
 
   @Inject
-  public TextureManager(Settings settings, SaResourcesManager srm, Kryo kryo) throws IOException {
+  public TextureManager(@Named("resource-properties") Properties props, SaResourcesManager srm, Kryo kryo) throws IOException {
     this.srm = srm;
     this.kryo = kryo;
-    texturesDir = settings.getOutputPath().resolve("textures");
+    texturesDir = Paths.get(props.getProperty(GatewayServerResourceConfig.CACHE_PROPERTY_KEY)).resolve("textures");
     Files.createDirectories(texturesDir);
     locks = new Object[srm.getMaxAdrnId() + 1];
     for(int i = 0; i < locks.length; i++)

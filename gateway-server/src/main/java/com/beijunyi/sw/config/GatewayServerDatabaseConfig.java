@@ -27,36 +27,36 @@ public class GatewayServerDatabaseConfig {
   public final static Path DATABASE_PROPERTIES = GatewayServerConstants.MODULE_HOME.resolve("database.properties");
   public final static Path DATABASE_LOCATION = GatewayServerConstants.MODULE_HOME.resolve("h2");
 
-  private final Properties cfg = new Properties();
+  private final Properties props = new Properties();
 
   public GatewayServerDatabaseConfig() throws IOException {
     if(!Files.exists(DATABASE_PROPERTIES)) {
-      loadDefaultSettings(cfg);
-      loadOverrideSettings(cfg);
+      loadDefaultSettings();
+      loadOverrideSettings();
       Files.createDirectories(DATABASE_PROPERTIES.getParent());
       try(OutputStream out = Files.newOutputStream(DATABASE_PROPERTIES)) {
-        cfg.store(out, null);
+        props.store(out, null);
       }
     } else {
-      loadDefaultSettings(cfg);
+      loadDefaultSettings();
       try(InputStream in = Files.newInputStream(DATABASE_PROPERTIES)) {
-        cfg.load(in);
+        props.load(in);
       }
-      loadOverrideSettings(cfg);
+      loadOverrideSettings();
     }
   }
 
-  private void loadDefaultSettings(Properties cfg) {
-    cfg.setProperty(AvailableSettings.DRIVER, org.h2.Driver.class.getCanonicalName());
-    cfg.setProperty(AvailableSettings.URL, "jdbc:h2:file:" + DATABASE_LOCATION);
-    cfg.setProperty(AvailableSettings.USER, GatewayServerConstants.MODULE_NAME);
-    cfg.setProperty(AvailableSettings.PASS, "");
-    cfg.setProperty(AvailableSettings.DIALECT, H2Dialect.class.getCanonicalName());
-    cfg.setProperty(AvailableSettings.SHOW_SQL, Boolean.toString(true));
-    cfg.setProperty(AvailableSettings.HBM2DDL_AUTO, "update");
+  private void loadDefaultSettings() {
+    props.setProperty(AvailableSettings.DRIVER, org.h2.Driver.class.getCanonicalName());
+    props.setProperty(AvailableSettings.URL, "jdbc:h2:file:" + DATABASE_LOCATION);
+    props.setProperty(AvailableSettings.USER, GatewayServerConstants.MODULE_NAME);
+    props.setProperty(AvailableSettings.PASS, "");
+    props.setProperty(AvailableSettings.DIALECT, H2Dialect.class.getCanonicalName());
+    props.setProperty(AvailableSettings.SHOW_SQL, Boolean.toString(true));
+    props.setProperty(AvailableSettings.HBM2DDL_AUTO, "update");
   }
 
-  private void loadOverrideSettings(Properties cfg) {
+  private void loadOverrideSettings() {
     Properties argCfg = System.getProperties();
     String[] keys = new String[] {
                                    AvailableSettings.DRIVER,
@@ -69,16 +69,16 @@ public class GatewayServerDatabaseConfig {
     };
     for(String key : keys) {
       if(argCfg.containsKey(key))
-        cfg.setProperty(key, argCfg.getProperty(key));
+        props.setProperty(key, argCfg.getProperty(key));
     }
   }
 
   @Bean
   public SessionFactory sessionFactory() throws Exception {
-    DataSource ds = new SimpleDriverDataSource((Driver) Class.forName(cfg.getProperty(AvailableSettings.DRIVER)).newInstance(), cfg.getProperty(AvailableSettings.URL));
+    DataSource ds = new SimpleDriverDataSource((Driver) Class.forName(props.getProperty(AvailableSettings.DRIVER)).newInstance(), props.getProperty(AvailableSettings.URL));
     LocalSessionFactoryBuilder sfb = new LocalSessionFactoryBuilder(ds);
     sfb.scanPackages("com.beijunyi.sw.security.model.*");
-    sfb.addProperties(cfg);
+    sfb.addProperties(props);
     return sfb.buildSessionFactory();
   }
 

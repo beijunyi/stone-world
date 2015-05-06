@@ -5,15 +5,17 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
-import com.beijunyi.sw.config.custom.Settings;
+import com.beijunyi.sw.config.GatewayServerResourceConfig;
 import com.beijunyi.sw.resources.models.Scene;
 import com.beijunyi.sw.sa.SaResourcesManager;
 import com.beijunyi.sw.sa.models.LS2Map;
@@ -34,10 +36,10 @@ public class SceneManager {
   private Map<Integer, byte[]> scenes = new HashMap<>();
 
   @Inject
-  public SceneManager(Settings settings, SaResourcesManager srm, Kryo kryo) throws IOException {
+  public SceneManager(@Named("resource-properties") Properties props, SaResourcesManager srm, Kryo kryo) throws IOException {
     this.srm = srm;
     this.kryo = kryo;
-    scenesDir = settings.getOutputPath().resolve("scenes");
+    scenesDir = Paths.get(props.getProperty(GatewayServerResourceConfig.CACHE_PROPERTY_KEY)).resolve("scenes");
     Files.createDirectories(scenesDir);
     locks = new Object[srm.getMaxLS2MapId() + 1];
     for(int i = 0; i < locks.length; i++)
