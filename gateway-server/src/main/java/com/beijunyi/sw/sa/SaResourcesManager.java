@@ -8,6 +8,7 @@ import java.nio.channels.FileChannel;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
+import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -27,41 +28,41 @@ public class SaResourcesManager {
   private static final Logger log = LoggerFactory.getLogger(SaResourcesManager.class);
 
   private final Kryo kryo;
+  private final Properties props;
 
-  private final Map<Integer, AdrnBlock> idAdrnMap = new HashMap<>();
-  private final Map<Integer, Integer> mapIdMap = new HashMap<>();
-  private final Map<Integer, SprAdrnBlock> idSprAdrnMap = new HashMap<>();
-  private final int maxAdrnId;
-  private final int maxSprAdrnId;
-  private final List<Long> sprAddresses = new ArrayList<>();
-  private final FileChannel realRA;
-  private final FileChannel sprRA;
+  private Map<Integer, AdrnBlock> idAdrnMap;
+  private Map<Integer, Integer> mapIdMap;
+  private Map<Integer, SprAdrnBlock> idSprAdrnMap;
+  private int maxAdrnId = -1;
+  private int maxSprAdrnId = -1;
+  private List<Long> sprAddresses;
+  private FileChannel realChannel;
+  private FileChannel sprChannel;
 
   private Map<Integer, Path> paletFiles;
-  private int maxPaletId;
+  private int maxPaletId = -1;
 
   private Map<Integer, Path> ls2MapFiles;
   private int maxLS2MapId;
 
   @Inject
-  public SaResourcesManager(@Named("resource-properties") Properties props, Kryo kryo) throws Exception {
+  public SaResourcesManager(@Named("resource-properties") Properties props, Kryo kryo) {
+    this.props = props;
     this.kryo = kryo;
+  }
 
+  @PostConstruct
+  public void prepareResources() throws IOException {
     Path saDataDir = Paths.get(props.getProperty(GatewayServerResourceConfig.SA_DATA_PROPERTY_KEY));
-
-    Map<ClientResource, Map<Integer, Path>> resources = locateClientResources(saDataDir);
-    try(InputStream is = Files.newInputStream(resources.get(ClientResource.ADRN).values().iterator().next())) {
-      Adrn adrn = kryo.readObject(new Input(is), Adrn.class);
-      maxAdrnId = indexAdrns(adrn);
+    if(Files.exists(saDataDir)) {
+      Map<ClientResource, Map<Integer, Path>> resources = new HashMap<>();
+      locateClientResources(saDataDir, resources);
+      indexAdrns(resources);
+      indexSprAdrns(resources);
+      openReal(resources);
+      openSpr(resources);
+      indexPalets(resources);
     }
-    try(InputStream is = Files.newInputStream(resources.get(ClientResource.SPRADRN).values().iterator().next())) {
-      SprAdrn sprAdrn = kryo.readObject(new Input(is), SprAdrn.class);
-      maxSprAdrnId = indexSprAdrns(sprAdrn);
-    }
-    realRA = FileChannel.open(resources.get(ClientResource.REAL).values().iterator().next());
-    sprRA = FileChannel.open(resources.get(ClientResource.SPR).values().iterator().next());
-
-    indexPalets(saDataDir);
 
     Path gmsvDataDir = Paths.get(props.getProperty(GatewayServerResourceConfig.GMSV_DATA_PROPERTY_KEY));
     indexLS2Maps(gmsvDataDir, kryo);
@@ -69,60 +70,134 @@ public class SaResourcesManager {
 
   @PreDestroy
   public void closeRAs() throws Exception {
-    realRA.close();
-    sprRA.close();
+    realChannel.close();
+    sprChannel.close();
   }
 
-  private Map<ClientResource, Map<Integer, Path>> locateClientResources(Path saDataDir) throws IOException {
-    Map<ClientResource, Map<Integer, Path>> resources = new HashMap<>();
-    try(DirectoryStream<Path> files = Files.newDirectoryStream(saDataDir)) {
+  private void locateClientResources(Path dir, Map<ClientResource, Map<Integer, Path>> resources) throws IOException {
+    try(DirectoryStream<Path> files = Files.newDirectoryStream(dir)) {
       for(Path file : files) {
-        for(ClientResource type : ClientResource.values()) {
-          String id = type.matches(file.getFileName().toString());
-          if(id != null) {
-            Map<Integer, Path> fs = resources.get(type);
-            if(fs == null) {
-              fs = new HashMap<>();
-              resources.put(type, fs);
+        if(Files.isDirectory(file))
+          locateClientResources(file, resources);
+        else {
+          for(ClientResource type : ClientResource.values()) {
+            String id = type.matches(file.getFileName().toString());
+            if(id != null) {
+              Map<Integer, Path> fs = resources.get(type);
+              if(fs == null) {
+                fs = new HashMap<>();
+                resources.put(type, fs);
+              }
+              fs.put(Integer.valueOf(id), file);
+              log.debug("Found " + type + " at " + file);
             }
-            fs.put(Integer.valueOf(id), file);
-            log.info("Found {} at {}.", type, file);
           }
         }
       }
     }
-    return resources;
   }
 
-  private int indexAdrns(Adrn adrn) {
-    int maxId = -1;
-    for(AdrnBlock block : adrn.getAdrnBlocks()) {
-      int id = block.getId();
-      idAdrnMap.put(id, block);
-      if(id > maxId)
-        maxId = id;
-      if(block.getMap() != 0)
-        mapIdMap.put(block.getMap(), id);
+  private static Path findUniqueClientResource(Map<ClientResource, Map<Integer, Path>> resources, ClientResource type) {
+    Map<Integer, Path> pathMap = resources.get(type);
+    if(pathMap.isEmpty()) {
+      log.info("No " + type + " file is found");
+      return null;
     }
-    return maxId;
+    List<Path> paths = new ArrayList<>(pathMap.values());
+    if(paths.size() != 1) {
+      StringBuilder sb = new StringBuilder("Found multiple " + type + " files: ");
+      Collections.sort(paths);
+      for(Path path : paths) {
+        sb.append("\n\t").append(path);
+      }
+      log.warn(sb.toString());
+      Collections.reverse(paths);
+    }
+    return paths.get(0);
+  }
+
+  private void indexAdrns(Map<ClientResource, Map<Integer, Path>> resources) throws IOException {
+    Path adrnPath = findUniqueClientResource(resources, ClientResource.ADRN);
+    if(adrnPath != null) {
+      log.info("Indexing " + adrnPath);
+      try(InputStream is = Files.newInputStream(adrnPath)) {
+        Adrn adrn = kryo.readObject(new Input(is), Adrn.class);
+        idAdrnMap = new HashMap<>();
+        mapIdMap = new HashMap<>();
+        for(AdrnBlock block : adrn.getAdrnBlocks()) {
+          int id = block.getId();
+          idAdrnMap.put(id, block);
+          if(id > maxAdrnId)
+            maxAdrnId = id;
+          if(block.getMap() != 0)
+            mapIdMap.put(block.getMap(), id);
+        }
+      }
+      log.info(Integer.toString(idAdrnMap.size()) + ClientResource.ADRN +  " objects are found, max ID is " + maxAdrnId);
+    }
+  }
+
+  private void indexSprAdrns(Map<ClientResource, Map<Integer, Path>> resources) throws IOException {
+    Path spradrnPath = findUniqueClientResource(resources, ClientResource.SPRADRN);
+    if(spradrnPath != null) {
+      log.info("Indexing " + spradrnPath);
+      try(InputStream is = Files.newInputStream(spradrnPath)) {
+        SprAdrn sprAdrn = kryo.readObject(new Input(is), SprAdrn.class);
+        SortedSet<Long> addressSet = new TreeSet<>();
+        idSprAdrnMap = new HashMap<>();
+        for(SprAdrnBlock block : sprAdrn.getSprAdrnBlocks()) {
+          int id = block.getId();
+          idSprAdrnMap.put(id, block);
+          addressSet.add(block.getAddress());
+          if(id > maxSprAdrnId)
+            maxSprAdrnId = id;
+        }
+        sprAddresses = new ArrayList<>(addressSet);
+      }
+      log.info(Integer.toString(idSprAdrnMap.size()) + ClientResource.SPRADRN + " objects are found, max ID is " + maxSprAdrnId);
+    }
+  }
+
+  private void openReal(Map<ClientResource, Map<Integer, Path>> resources) throws IOException {
+    Path realPath = findUniqueClientResource(resources, ClientResource.REAL);
+    if(realPath != null) {
+      log.info("Opening " + realPath);
+      realChannel = FileChannel.open(realPath);
+      log.info(ClientResource.REAL + " objects are ready, size is " + realChannel.size());
+    }
+  }
+
+  private void openSpr(Map<ClientResource, Map<Integer, Path>> resources) throws IOException {
+    Path sprPath = findUniqueClientResource(resources, ClientResource.SPR);
+    if(sprPath != null) {
+      log.info("Opening " + sprPath);
+      sprChannel = FileChannel.open(sprPath);
+      log.info(ClientResource.SPR + " objects are ready, size is " + sprChannel.size());
+    }
+  }
+
+
+  private void indexPalets(Map<ClientResource, Map<Integer, Path>> resources) throws IOException {
+    Map<Integer, Path> pathMap = resources.get(ClientResource.PALET);
+    if(pathMap.isEmpty()) {
+      log.info("No " + ClientResource.PALET + " file is found");
+      return;
+    }
+    log.info("Indexing " + ClientResource.PALET + " files");
+    paletFiles = new HashMap<>();
+    int count = 0;
+    for(Map.Entry<Integer, Path> entry : pathMap.entrySet()) {
+      int id = entry.getKey();
+      paletFiles.put(id, entry.getValue());
+      if(id > maxPaletId)
+        maxPaletId = id;
+      count++;
+    }
+    log.info(Integer.toString(count) + ClientResource.PALET + " objects are found, max ID is " + maxPaletId);
   }
 
   public int getMaxAdrnId() {
     return maxAdrnId;
-  }
-
-  private int indexSprAdrns(SprAdrn sprAdrn) {
-    SortedSet<Long> addressSet = new TreeSet<>();
-    int maxId = -1;
-    for(SprAdrnBlock block : sprAdrn.getSprAdrnBlocks()) {
-      int id = block.getId();
-      idSprAdrnMap.put(id, block);
-      addressSet.add(block.getAddress());
-      if(id > maxId)
-        maxId = id;
-    }
-    sprAddresses.addAll(addressSet);
-    return maxId;
   }
 
   public int getMaxSprAdrnId() {
@@ -153,9 +228,9 @@ public class SaResourcesManager {
     ByteBuffer buf = ByteBuffer.allocate(length);
 
     try {
-      synchronized(realRA) {
-        realRA.position(address);
-        realRA.read(buf);
+      synchronized(realChannel) {
+        realChannel.position(address);
+        realChannel.read(buf);
       }
     } catch(IOException e) {
       throw new RuntimeException(e);
@@ -173,13 +248,13 @@ public class SaResourcesManager {
       int nextIndex = Collections.binarySearch(sprAddresses, address) + 1;
       int length;
       if(nextIndex == sprAddresses.size())
-        length = (int) (sprRA.size() - address);
+        length = (int) (sprChannel.size() - address);
       else
         length = (int) (sprAddresses.get(nextIndex) - address);
       buf = ByteBuffer.allocate(length);
-      synchronized(sprRA) {
-        sprRA.position(address);
-        sprRA.read(buf);
+      synchronized(sprChannel) {
+        sprChannel.position(address);
+        sprChannel.read(buf);
       }
     } catch(IOException e) {
       throw new RuntimeException(e);
@@ -189,24 +264,6 @@ public class SaResourcesManager {
     for(int a = 0; a < actions; a++)
       blocks.add(kryo.readObject(input, SprBlock.class));
     return blocks;
-  }
-
-  private void indexPalets(Path clientDataPath) throws IOException {
-    paletFiles = new HashMap<>();
-    Path palsDir = clientDataPath.resolve("pal");
-    if(Files.exists(palsDir)) {
-      try(DirectoryStream<Path> pals = Files.newDirectoryStream(palsDir)) {
-        for(Path pal : pals) {
-          String label = ClientResource.PALET.matches(pal.getFileName().toString());
-          if(label == null)
-            continue;
-          int id = Integer.valueOf(label);
-          paletFiles.put(id, pal);
-          if(id > maxPaletId)
-            maxPaletId = id;
-        }
-      }
-    }
   }
 
   public int getMaxPaletId() {
