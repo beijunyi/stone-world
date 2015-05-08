@@ -7,6 +7,8 @@ import com.beijunyi.sw.AppConstants;
 import com.beijunyi.sw.config.custom.CustomResourcesSettings;
 import com.esotericsoftware.kryo.Kryo;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.jasypt.util.password.BasicPasswordEncryptor;
+import org.jasypt.util.password.PasswordEncryptor;
 import org.jgroups.JChannel;
 import org.springframework.context.annotation.*;
 
@@ -25,6 +27,11 @@ public class GatewayServerConfig {
     Kryo kryo = new Kryo();
     kryo.setReferences(false);
     return kryo;
+  }
+
+  @Bean
+  public PasswordEncryptor passwordEncryptor() {
+    return new BasicPasswordEncryptor();
   }
 
   @Bean

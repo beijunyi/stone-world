@@ -3,12 +3,10 @@ package com.beijunyi.sw.config;
 import javax.inject.Inject;
 
 import org.jasypt.springsecurity3.authentication.encoding.PasswordEncoder;
-import org.jasypt.util.password.BasicPasswordEncryptor;
 import org.jasypt.util.password.PasswordEncryptor;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -22,35 +20,19 @@ import org.springframework.security.web.authentication.rememberme.InMemoryTokenR
 public class GatewayServerSecurityConfig extends WebSecurityConfigurerAdapter {
 
   public final static String LOGIN_PAGE = "/login.html";
+  public final static String LOGIN_ERROR_SUFFIX = "#error";
   public final static String LOGIN_URL = "/login";
   public final static String LOGOUT_URL = "/logout";
 
   @Inject
-  private UserDetailsService userDetailsService;
-
-  @Bean
-  public InMemoryTokenRepositoryImpl inMemoryTokenRepository() {
-    return new InMemoryTokenRepositoryImpl();
-  }
-
-  @Bean
-  public PasswordEncryptor passwordEncryptor() {
-    return new BasicPasswordEncryptor();
-  }
-
-  @Bean
-  public PasswordEncoder passwordEncoder() {
+  public void configureGlobal(AuthenticationManagerBuilder amb, UserDetailsService uds, PasswordEncryptor pe) throws Exception {
     PasswordEncoder passwordEncoder = new PasswordEncoder();
-    passwordEncoder.setPasswordEncryptor(passwordEncryptor());
-    return passwordEncoder;
-  }
+    passwordEncoder.setPasswordEncryptor(pe);
 
-  @Bean
-  public AuthenticationProvider authenticationProvider() {
-    DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider();
-    daoAuthenticationProvider.setUserDetailsService(userDetailsService);
-    daoAuthenticationProvider.setPasswordEncoder(passwordEncoder());
-    return daoAuthenticationProvider;
+    DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
+    authenticationProvider.setUserDetailsService(uds);
+    authenticationProvider.setPasswordEncoder(passwordEncoder);
+    amb.authenticationProvider(authenticationProvider);
   }
 
   @Override
@@ -61,15 +43,13 @@ public class GatewayServerSecurityConfig extends WebSecurityConfigurerAdapter {
       .formLogin()
       .loginProcessingUrl(LOGIN_URL)
       .loginPage(LOGIN_PAGE)
-      .failureUrl(LOGIN_PAGE + "#error").permitAll()
+      .failureUrl(LOGIN_PAGE + LOGIN_ERROR_SUFFIX).permitAll()
     .and()
       .logout()
       .logoutUrl(LOGOUT_URL)
       .logoutSuccessUrl(LOGIN_PAGE)
     .and()
-      .authenticationProvider(authenticationProvider())
       .rememberMe()
-      .tokenRepository(inMemoryTokenRepository())
-      .userDetailsService(userDetailsService);
+      .tokenRepository(new InMemoryTokenRepositoryImpl());
   }
 }
