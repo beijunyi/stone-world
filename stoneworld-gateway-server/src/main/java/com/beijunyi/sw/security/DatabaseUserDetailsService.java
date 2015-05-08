@@ -15,17 +15,17 @@ import org.springframework.transaction.annotation.Transactional;
 public class DatabaseUserDetailsService implements UserDetailsService {
 
 
-  private AccountDao ad;
+  private AccountManager accountManager;
 
   @Inject
-  public DatabaseUserDetailsService(AccountDao ad) {
-    this.ad = ad;
+  public DatabaseUserDetailsService(AccountManager accountManager) {
+    this.accountManager = accountManager;
   }
 
   @Override
   @Transactional
   public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-    Account account = ad.findByUsername(username);
+    Account account = accountManager.getAccount(username);
 
     if(account == null)
       throw new UsernameNotFoundException("Could not find user " + username);
