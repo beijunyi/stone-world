@@ -7,6 +7,6 @@ public enum GameMessageEnum implements InternalMessageEnum {
   GAME_SERVER_ONLINE,
   GAME_SERVER_OFFLINE,
 
-  NEW_TOKEN,
+  PLAYER_TOKEN,
 
 }

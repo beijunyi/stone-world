@@ -16,12 +16,12 @@ import org.jgroups.ReceiverAdapter;
 public class GatewayMessageReceiver extends ReceiverAdapter {
 
   private final JChannel channel;
-  private final GameServerMessageHandler gsmHandler;
+  private final GatewayMessageHandler gmHandler;
 
   @Inject
-  public GatewayMessageReceiver(JChannel channel, GameServerMessageHandler gsmHandler) throws Exception {
+  public GatewayMessageReceiver(JChannel channel, GatewayMessageHandler gmHandler) throws Exception {
     this.channel = channel;
-    this.gsmHandler = gsmHandler;
+    this.gmHandler = gmHandler;
     channel.setReceiver(this);
   }
 
@@ -40,7 +40,7 @@ public class GatewayMessageReceiver extends ReceiverAdapter {
   public void receive(Message msg) {
     Object msgObj = msg.getObject();
     if(msgObj instanceof GameMessage) {
-      gsmHandler.handle((GameMessage) msgObj, msg.getSrc());
+      gmHandler.handle((GameMessage)msgObj, msg.getSrc());
     }
   }
 

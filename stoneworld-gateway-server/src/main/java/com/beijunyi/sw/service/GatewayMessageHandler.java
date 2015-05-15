@@ -9,12 +9,12 @@ import com.beijunyi.sw.message.gameserver.GameServerOnline;
 import org.jgroups.Address;
 
 @Named
-public class GameServerMessageHandler {
+public class GatewayMessageHandler {
 
   private final GameServerManager gsManager;
 
   @Inject
-  public GameServerMessageHandler(GameServerManager gsManager) {
+  public GatewayMessageHandler(GameServerManager gsManager) {
     this.gsManager = gsManager;
   }
 
