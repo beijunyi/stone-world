@@ -15,7 +15,7 @@
   <dependencies>
     <dependency>
       <groupId>com.beijunyi.stoneworld</groupId>
-      <artifactId>shared-models</artifactId>
+      <artifactId>stoneworld-shared-models</artifactId>
       <version>1.0-SNAPSHOT</version>
     </dependency>
     <dependency>
