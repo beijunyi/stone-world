@@ -77,7 +77,7 @@ public class GatewayServerDatabaseConfig {
   public SessionFactory sessionFactory() throws Exception {
     DataSource ds = new SimpleDriverDataSource((Driver) Class.forName(props.getProperty(AvailableSettings.DRIVER)).newInstance(), props.getProperty(AvailableSettings.URL));
     LocalSessionFactoryBuilder sfb = new LocalSessionFactoryBuilder(ds);
-    sfb.scanPackages("com.beijunyi.sw.security.model.*");
+    sfb.scanPackages("com.beijunyi.sw.security.model.**");
     sfb.addProperties(props);
     return sfb.buildSessionFactory();
   }

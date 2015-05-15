@@ -20,6 +20,8 @@ import org.springframework.security.web.authentication.rememberme.InMemoryTokenR
 public class GatewayServerSecurityConfig extends WebSecurityConfigurerAdapter {
 
   public final static String LOGIN_PAGE = "/login.html";
+  public final static String USERNAME_PARAM = "sw-username";
+  public final static String PASSWORD_PARAM = "sw-password";
   public final static String LOGIN_ERROR_SUFFIX = "#error";
   public final static String LOGIN_URL = "/login";
   public final static String LOGOUT_URL = "/logout";
@@ -37,12 +39,16 @@ public class GatewayServerSecurityConfig extends WebSecurityConfigurerAdapter {
 
   @Override
   protected void configure(HttpSecurity http) throws Exception {
-    http.authorizeRequests()
+    http
+      .csrf().disable()
+      .authorizeRequests()
       .anyRequest().authenticated()
     .and()
       .formLogin()
       .loginProcessingUrl(LOGIN_URL)
       .loginPage(LOGIN_PAGE)
+      .usernameParameter(USERNAME_PARAM)
+      .passwordParameter(PASSWORD_PARAM)
       .failureUrl(LOGIN_PAGE + LOGIN_ERROR_SUFFIX).permitAll()
     .and()
       .logout()

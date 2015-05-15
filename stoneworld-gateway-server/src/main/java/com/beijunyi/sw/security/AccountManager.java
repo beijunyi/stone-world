@@ -23,6 +23,10 @@ public class AccountManager {
   @Inject
   private PasswordEncryptor pe;
 
+  @Transactional
+  public long countAccounts() {
+    return ad.count();
+  }
 
   @Transactional
   public QueryResult<Account> queryAccounts(QueryRequest request) {

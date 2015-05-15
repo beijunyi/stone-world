@@ -2,7 +2,7 @@ package com.beijunyi.sw.config;
 
 import javax.inject.Inject;
 
-import com.beijunyi.sw.websocket.WebSocketService;
+import com.beijunyi.sw.websocket.GameWebSocketService;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.DefaultServletHandlerConfigurer;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -17,11 +17,11 @@ import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
 public class WebMvcConfig extends WebMvcConfigurerAdapter implements WebSocketConfigurer {
 
   @Inject
-  private WebSocketService webSocketService;
+  private GameWebSocketService gameWebSocketService;
 
   @Override
   public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-    registry.addHandler(webSocketService, "/snake");
+    registry.addHandler(gameWebSocketService, "/socket");
   }
 
   @Override

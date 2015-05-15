@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+  <meta charset="utf-8"/>
+  <title>Stone World</title>
+  <link rel="icon" type="image/png" href="favicon.ico">
+
+  <style>
+    * {
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      -khtml-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+    .center-box {
+      width: 400px;
+      margin: 200px auto 0;
+      padding: 20px 40px 40px;
+
+      background-color: #fff;
+      box-shadow: 0 5px 15px rgba(0,0,0,.5);
+      border: 1px solid rgba(0,0,0,.2);
+      border-radius: 6px;
+    }
+    .fields {
+      padding-top: 10px;
+      padding-bottom: 10px;
+    }
+    .field {
+      height: 40px;
+    }
+    label {
+      width: 100px;
+      display: inline-block;
+      margin-bottom: 5px;
+      font-weight: 700;
+      font-size: 14px;
+      text-align: right;
+      box-sizing: border-box;
+      padding-right: 10px;
+    }
+    .error label {
+      color: #a94442;
+    }
+    input {
+      height: 34px;
+      padding: 6px 12px;
+      font-size: 14px;
+      line-height: 1.42857143;
+      color: #555;
+      background-color: #fff;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+      margin-right: 10px;
+      outline: 0;
+      transition: .25s;
+      width: 196px;
+    }
+    input:focus {
+      border-color: #66afe9;
+      box-shadow: inset 0 1px 1px rgba(0,0,0,.075),0 0 8px rgba(102,175,233,.6);
+    }
+    .error input {
+      border-color: #a94442;
+      box-shadow: inset 0 1px 1px rgba(0,0,0,.075);
+    }
+    .error input:focus {
+      border-color: #843534;
+      box-shadow: inset 0 1px 1px rgba(0,0,0,.075),0 0 6px #ce8483;
+    }
+    button {
+      padding: 6px 12px;
+      color: #fff;
+      background-color: #428bca;
+      border: 1px solid #357ebd;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: .25s;
+    }
+    button:hover {
+      background-color: #3071a9;
+      border-color: #285e8e;
+    }
+  </style>
+
+</head>
+
+<body>
+
+<div class="center-box">
+  <form action="/login" method="post">
+    <div class="fields">
+      <div class="field">
+        <label for="username">Username</label>
+        <input id="username" name="sw-username" type="text">
+      </div>
+      <div class="field">
+        <label for="password">Password</label>
+        <input id="password" name="sw-password" type="password">
+        <button type="submit">Sign in</button>
+      </div>
+    </div>
+  </form>
+</div>
+
+<script>
+  if(window.location.hash == '#error')
+    document.querySelector('.fields').classList.add('error');
+
+</script>
+
+</body>
+</html>

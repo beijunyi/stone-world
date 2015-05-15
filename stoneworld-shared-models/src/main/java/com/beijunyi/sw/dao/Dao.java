@@ -5,6 +5,8 @@ import java.util.Map;
 
 public interface Dao<T> {
 
+  long count();
+
   List<T> listAll();
 
   List<T> listBy(String key, Object value);

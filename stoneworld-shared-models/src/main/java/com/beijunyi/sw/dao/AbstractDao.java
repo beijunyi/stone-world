@@ -33,6 +33,14 @@ public abstract class AbstractDao<T> implements Dao<T> {
   }
 
   @Override
+  public long count() {
+    return (long) sf.getCurrentSession()
+                    .createCriteria(getPersistentClass())
+                    .setProjection(Projections.rowCount())
+                    .uniqueResult();
+  }
+
+  @Override
   @SuppressWarnings("unchecked")
   public List<T> listAll() {
     return sf.getCurrentSession()
