@@ -3,20 +3,16 @@ package com.beijunyi.sw.service;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import com.beijunyi.sw.message.gameserver.GameMessage;
-import com.beijunyi.sw.message.gameserver.GameServerOffline;
-import com.beijunyi.sw.message.gameserver.GameServerOnline;
+import com.beijunyi.sw.message.gameserver.*;
 import org.jgroups.Address;
 
 @Named
 public class GatewayMessageHandler {
 
-  private final GameServerManager gsManager;
-
   @Inject
-  public GatewayMessageHandler(GameServerManager gsManager) {
-    this.gsManager = gsManager;
-  }
+  private GameServerManager gsManager;
+  @Inject
+  private PlayerManager playerManager;
 
   public void handle(GameMessage message, Address src) {
     switch(message.getType()) {
@@ -27,6 +23,10 @@ public class GatewayMessageHandler {
       case GAME_SERVER_OFFLINE:
         GameServerOffline gsOffline = (GameServerOffline) message;
         gsManager.removeGameServer(gsOffline.getName());
+        break;
+      case PLAYER_TOKEN:
+        PlayerToken token = (PlayerToken) message;
+        playerManager.updateToken(token);
         break;
     }
   }
