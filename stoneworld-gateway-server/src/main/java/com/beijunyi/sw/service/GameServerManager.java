@@ -6,6 +6,12 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import com.beijunyi.sw.message.InternalMessage;
+import com.beijunyi.sw.message.InternalMessageHandler;
+import com.beijunyi.sw.message.gameserver.GameMessageEnum;
+import com.beijunyi.sw.message.gameserver.GameServerOffline;
+import com.beijunyi.sw.message.gameserver.GameServerOnline;
+import com.beijunyi.sw.message.gatewayserver.GatewayMessageEnum;
 import com.beijunyi.sw.message.gatewayserver.RequestToken;
 import com.beijunyi.sw.service.model.GameServerStatus;
 import org.jgroups.Address;
@@ -14,7 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Named
-public class GameServerManager {
+public class GameServerManager implements InternalMessageHandler {
 
   private static final Logger log = LoggerFactory.getLogger(GameServerManager.class);
 
@@ -24,7 +30,7 @@ public class GameServerManager {
   @Inject
   private JChannel channel;
 
-  public void addGameServer(String name, String ip, int port, Address address) {
+  private void addGameServer(String name, String ip, int port, Address address) {
     synchronized(gsStatuses) {
       GameServerStatus gss = new GameServerStatus(name, ip, port, address);
       gsStatuses.add(0, gss);
@@ -33,7 +39,7 @@ public class GameServerManager {
     log.info("Successfully registered Game Server: " + name);
   }
 
-  public void removeGameServer(String name) {
+  private void removeGameServer(String name) {
     synchronized(gsStatuses) {
       Iterator<GameServerStatus> gsIt = gsStatuses.iterator();
       int index = 0;
@@ -72,5 +78,16 @@ public class GameServerManager {
       return false;
     }
     return true;
+  }
+
+  @Override
+  public void handle(InternalMessage msg, Address src) throws Exception {
+    if(GameMessageEnum.GAME_SERVER_ONLINE.equals(msg.getType())) {
+      GameServerOnline gsOnline = (GameServerOnline) msg;
+      addGameServer(gsOnline.getName(), gsOnline.getIp(), gsOnline.getPort(), src);
+    } else if(GatewayMessageEnum.GATEWAY_SERVER_OFFLINE.equals(msg.getType())) {
+      GameServerOffline gsOffline = (GameServerOffline) msg;
+      removeGameServer(gsOffline.getName());
+    }
   }
 }

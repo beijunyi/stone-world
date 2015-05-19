@@ -4,10 +4,14 @@ import java.util.*;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import com.beijunyi.sw.message.InternalMessage;
+import com.beijunyi.sw.message.InternalMessageHandler;
+import com.beijunyi.sw.message.gameserver.GameMessageEnum;
 import com.beijunyi.sw.message.gameserver.PlayerToken;
+import org.jgroups.Address;
 
 @Named
-public class PlayerManager {
+public class PlayerManager implements InternalMessageHandler {
 
   private final Map<String, PlayerToken> tokenMap = new HashMap<>();
   private final Set<String> pending = new HashSet<>();
@@ -29,7 +33,7 @@ public class PlayerManager {
     return token;
   }
 
-  public void updateToken(PlayerToken token) {
+  private void updateToken(PlayerToken token) {
     String key = token.getKey();
     synchronized(pending) {
       if(!pending.remove(key))
@@ -38,5 +42,11 @@ public class PlayerManager {
     }
   }
 
-
+  @Override
+  public void handle(InternalMessage msg, Address src) throws Exception {
+    if(GameMessageEnum.PLAYER_TOKEN.equals(msg.getType())) {
+      PlayerToken token = (PlayerToken) msg;
+      updateToken(token);
+    }
+  }
 }

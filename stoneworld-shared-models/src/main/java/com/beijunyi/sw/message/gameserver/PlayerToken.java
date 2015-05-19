@@ -3,16 +3,14 @@ package com.beijunyi.sw.message.gameserver;
 public class PlayerToken extends GameMessage {
 
   private String key;
-  private String ip;
-  private int port;
-  private String token;
+  private String url;
+  private String uid;
 
-  public PlayerToken(String key, String ip, int port, String token) {
+  public PlayerToken(String key, String url, String uid) {
     this();
     this.key = key;
-    this.ip = ip;
-    this.port = port;
-    this.token = token;
+    this.url = url;
+    this.uid = uid;
   }
 
   public PlayerToken() {
@@ -23,15 +21,11 @@ public class PlayerToken extends GameMessage {
     return key;
   }
 
-  public String getIp() {
-    return ip;
+  public String getUrl() {
+    return url;
   }
 
-  public int getPort() {
-    return port;
-  }
-
-  public String getToken() {
-    return token;
+  public String getUid() {
+    return uid;
   }
 }

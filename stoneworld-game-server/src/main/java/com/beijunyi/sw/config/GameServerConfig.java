@@ -1,7 +1,12 @@
 package com.beijunyi.sw.config;
 
+import java.util.Collection;
+import javax.inject.Inject;
+
 import com.beijunyi.sw.AppConstants;
 import com.beijunyi.sw.config.model.GameServerProperties;
+import com.beijunyi.sw.message.InternalMessageHandler;
+import com.beijunyi.sw.message.InternalMessageReceiver;
 import org.jgroups.JChannel;
 import org.springframework.context.annotation.*;
 
@@ -15,6 +20,14 @@ public class GameServerConfig {
     JChannel channel = new JChannel();
     channel.connect(System.getProperty("cluster.name", AppConstants.DEFAULT_CLUSTER));
     return channel;
+  }
+
+  @Bean
+  @Inject
+  public InternalMessageReceiver internalMessageReceiver(JChannel channel, Collection<InternalMessageHandler> handlers) {
+    InternalMessageReceiver receiver = new InternalMessageReceiver(handlers);
+    channel.setReceiver(receiver);
+    return receiver;
   }
 
   @Bean
