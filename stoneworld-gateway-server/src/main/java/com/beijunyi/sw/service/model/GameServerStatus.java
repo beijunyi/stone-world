@@ -1,15 +1,13 @@
 package com.beijunyi.sw.service.model;
 
-import org.jgroups.Address;
-
 public class GameServerStatus {
 
   private final String name;
   private final String ip;
   private final int port;
-  private final Address address;
+  private final Object address;
 
-  public GameServerStatus(String name, String ip, int port, Address address) {
+  public GameServerStatus(String name, String ip, int port, Object address) {
     this.name = name;
     this.ip = ip;
     this.port = port;
@@ -28,7 +26,7 @@ public class GameServerStatus {
     return port;
   }
 
-  public Address getAddress() {
+  public Object getAddress() {
     return address;
   }
 }

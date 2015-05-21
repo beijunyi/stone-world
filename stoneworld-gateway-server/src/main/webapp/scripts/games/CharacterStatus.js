@@ -1,3 +1,3 @@
-app.factory('CharacterStatus', function() {
+app.factory('CharacterStatus', function(GameSocket) {
 
 });

@@ -1,4 +1,4 @@
-app.directive('world', function(SceneLoader, TrafficService, TrafficConstants) {
+app.directive('world', function(CharacterStatus, SceneLoader, TrafficService, TrafficConstants) {
   return {
     restrict: 'E',
     scope: {

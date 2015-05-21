@@ -5,19 +5,24 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import com.beijunyi.sw.message.InternalMessage;
+import com.beijunyi.sw.message.InternalMessageBroker;
 import com.beijunyi.sw.message.InternalMessageHandler;
 import com.beijunyi.sw.message.gameserver.GameMessageEnum;
 import com.beijunyi.sw.message.gameserver.PlayerToken;
-import org.jgroups.Address;
 
 @Named
-public class PlayerManager implements InternalMessageHandler {
+public class PlayerManager extends InternalMessageHandler {
 
   private final Map<String, PlayerToken> tokenMap = new HashMap<>();
   private final Set<String> pending = new HashSet<>();
 
+  private final GameServerManager gsManager;
+
   @Inject
-  private GameServerManager gsManager;
+  public PlayerManager(InternalMessageBroker broker, GameServerManager gsManager) {
+    super(broker);
+    this.gsManager = gsManager;
+  }
 
   public PlayerToken getToken(String key) {
     PlayerToken token;
@@ -43,7 +48,7 @@ public class PlayerManager implements InternalMessageHandler {
   }
 
   @Override
-  public void handle(InternalMessage msg, Address src) throws Exception {
+  protected void handle(InternalMessage msg, Object src) throws Exception {
     if(GameMessageEnum.PLAYER_TOKEN.equals(msg.getType())) {
       PlayerToken token = (PlayerToken) msg;
       updateToken(token);

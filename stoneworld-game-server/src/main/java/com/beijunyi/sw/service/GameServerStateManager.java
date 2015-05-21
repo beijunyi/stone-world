@@ -5,37 +5,39 @@ import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import com.beijunyi.sw.config.model.GameServerProperties;
+import com.beijunyi.sw.config.model.GameServerMainProperties;
 import com.beijunyi.sw.message.InternalMessage;
+import com.beijunyi.sw.message.InternalMessageBroker;
 import com.beijunyi.sw.message.InternalMessageHandler;
 import com.beijunyi.sw.message.gameserver.GameServerOffline;
 import com.beijunyi.sw.message.gameserver.GameServerOnline;
 import com.beijunyi.sw.message.gatewayserver.GatewayMessageEnum;
-import org.jgroups.Address;
-import org.jgroups.JChannel;
 
 @Named
-public class GameServerStateManager implements InternalMessageHandler {
+public class GameServerStateManager extends InternalMessageHandler {
+
+  private final GameServerMainProperties props;
 
   @Inject
-  private JChannel channel;
-  @Inject
-  private GameServerProperties props;
+  public GameServerStateManager(InternalMessageBroker broker,GameServerMainProperties props) {
+    super(broker);
+    this.props = props;
+  }
 
   @PostConstruct
   public void init() throws Exception {
-    channel.send(null, new GameServerOnline(props.getName(), props.getIp(), props.getPort()));
+    broadcast(new GameServerOnline(props.getName(), props.getIp(), props.getPort()));
   }
 
   @PreDestroy
   public void dispose() throws Exception {
-    channel.send(null, new GameServerOffline(props.getName()));
+    broadcast(new GameServerOffline(props.getName()));
   }
 
   @Override
-  public void handle(InternalMessage msg, Address src) throws Exception {
+  protected void handle(InternalMessage msg, Object src) throws Exception {
     if(GatewayMessageEnum.GATEWAY_SERVER_ONLINE.equals(msg.getType())) {
-      channel.send(src, new GameServerOnline(props.getName(), props.getIp(), props.getPort()));
+      send(new GameServerOnline(props.getName(), props.getIp(), props.getPort()), src);
     }
   }
 

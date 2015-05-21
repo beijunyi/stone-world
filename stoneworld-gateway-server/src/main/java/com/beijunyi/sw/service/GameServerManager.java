@@ -7,20 +7,18 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import com.beijunyi.sw.message.InternalMessage;
+import com.beijunyi.sw.message.InternalMessageBroker;
 import com.beijunyi.sw.message.InternalMessageHandler;
 import com.beijunyi.sw.message.gameserver.GameMessageEnum;
 import com.beijunyi.sw.message.gameserver.GameServerOffline;
 import com.beijunyi.sw.message.gameserver.GameServerOnline;
-import com.beijunyi.sw.message.gatewayserver.GatewayMessageEnum;
 import com.beijunyi.sw.message.gatewayserver.RequestToken;
 import com.beijunyi.sw.service.model.GameServerStatus;
-import org.jgroups.Address;
-import org.jgroups.JChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Named
-public class GameServerManager implements InternalMessageHandler {
+public class GameServerManager extends InternalMessageHandler {
 
   private static final Logger log = LoggerFactory.getLogger(GameServerManager.class);
 
@@ -28,13 +26,14 @@ public class GameServerManager implements InternalMessageHandler {
   private int nextGsIndex = 0;
 
   @Inject
-  private JChannel channel;
+  public GameServerManager(InternalMessageBroker broker) {
+    super(broker);
+  }
 
-  private void addGameServer(String name, String ip, int port, Address address) {
+  private void addGameServer(String name, String ip, int port, Object address) {
     synchronized(gsStatuses) {
       GameServerStatus gss = new GameServerStatus(name, ip, port, address);
-      gsStatuses.add(0, gss);
-      nextGsIndex++;
+      gsStatuses.add(nextGsIndex, gss);
     }
     log.info("Successfully registered Game Server: " + name);
   }
@@ -72,7 +71,7 @@ public class GameServerManager implements InternalMessageHandler {
     if(gs == null)
       return false;
     try {
-      channel.send(gs.getAddress(), new RequestToken(key));
+      send(new RequestToken(key), gs.getAddress());
     } catch(Exception e) {
       log.error("Could not request token from " + gs.getAddress(), e);
       return false;
@@ -81,11 +80,11 @@ public class GameServerManager implements InternalMessageHandler {
   }
 
   @Override
-  public void handle(InternalMessage msg, Address src) throws Exception {
+  protected void handle(InternalMessage msg, Object src) throws Exception {
     if(GameMessageEnum.GAME_SERVER_ONLINE.equals(msg.getType())) {
       GameServerOnline gsOnline = (GameServerOnline) msg;
       addGameServer(gsOnline.getName(), gsOnline.getIp(), gsOnline.getPort(), src);
-    } else if(GatewayMessageEnum.GATEWAY_SERVER_OFFLINE.equals(msg.getType())) {
+    } else if(GameMessageEnum.GAME_SERVER_OFFLINE.equals(msg.getType())) {
       GameServerOffline gsOffline = (GameServerOffline) msg;
       removeGameServer(gsOffline.getName());
     }

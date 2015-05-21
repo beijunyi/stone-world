@@ -2,22 +2,28 @@ package com.beijunyi.sw.service;
 
 import java.util.HashMap;
 import java.util.Map;
+import javax.inject.Inject;
 import javax.inject.Named;
 
 import com.beijunyi.sw.message.InternalMessage;
+import com.beijunyi.sw.message.InternalMessageBroker;
 import com.beijunyi.sw.message.InternalMessageHandler;
 import com.beijunyi.sw.message.gatewayserver.GatewayMessageEnum;
 import com.beijunyi.sw.message.gatewayserver.GatewayServerOffline;
 import com.beijunyi.sw.message.gatewayserver.GatewayServerOnline;
 import com.beijunyi.sw.service.model.GatewayServerStatus;
-import org.jgroups.Address;
 
 @Named
-public class GatewayServerManager implements InternalMessageHandler {
+public class GatewayServerManager extends InternalMessageHandler {
 
   private final Map<String, GatewayServerStatus> gateways = new HashMap<>();
 
-  private void addGatewayServer(String name, Address address) {
+  @Inject
+  public GatewayServerManager(InternalMessageBroker broker) {
+    super(broker);
+  }
+
+  private void addGatewayServer(String name, Object address) {
     if(gateways.containsKey(name))
       throw new IllegalArgumentException();
 
@@ -29,7 +35,7 @@ public class GatewayServerManager implements InternalMessageHandler {
   }
 
   @Override
-  public void handle(InternalMessage msg, Address src) throws Exception {
+  protected void handle(InternalMessage msg, Object src) throws Exception {
     if(GatewayMessageEnum.GATEWAY_SERVER_ONLINE.equals(msg.getType())) {
       GatewayServerOnline gwOnline = (GatewayServerOnline) msg;
       addGatewayServer(gwOnline.getName(), src);

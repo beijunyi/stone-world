@@ -4,15 +4,13 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
-import com.beijunyi.sw.config.GatewayServerResourceConfig;
+import com.beijunyi.sw.config.model.GatewayServerResourceProperties;
 import com.beijunyi.sw.resources.models.Palette;
 import com.beijunyi.sw.sa.SaResourcesManager;
 import com.beijunyi.sw.sa.models.Palet;
@@ -71,10 +69,10 @@ public class PaletteManager {
   private Map<Integer, byte[]> palettes = new HashMap<>();
 
   @Inject
-  public PaletteManager(@Named("resource-properties") Properties props, SaResourcesManager srm, Kryo kryo) throws IOException {
+  public PaletteManager(GatewayServerResourceProperties props, SaResourcesManager srm, Kryo kryo) throws IOException {
     this.srm = srm;
     this.kryo = kryo;
-    palettesDir = Paths.get(props.getProperty(GatewayServerResourceConfig.CACHE_PROPERTY_KEY)).resolve("palettes");
+    palettesDir = props.getCacheLocation().resolve("palettes");
     Files.createDirectories(palettesDir);
     locks = new Object[srm.getMaxPaletId() + 1];
     for(int i = 0; i < locks.length; i++)

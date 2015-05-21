@@ -3,35 +3,31 @@ package com.beijunyi.sw.service;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Named;
 
 import com.beijunyi.sw.GameServerConstants;
-import com.beijunyi.sw.config.model.GameServerProperties;
+import com.beijunyi.sw.config.model.GameServerMainProperties;
 import com.beijunyi.sw.message.InternalMessage;
+import com.beijunyi.sw.message.InternalMessageBroker;
 import com.beijunyi.sw.message.InternalMessageHandler;
 import com.beijunyi.sw.message.gameserver.PlayerToken;
 import com.beijunyi.sw.message.gatewayserver.GatewayMessageEnum;
 import com.beijunyi.sw.message.gatewayserver.RequestToken;
-import org.jgroups.Address;
-import org.jgroups.JChannel;
 
 @Named
-public class TokenManager implements InternalMessageHandler {
+public class TokenManager extends InternalMessageHandler {
 
   private final Map<String, PlayerToken> tokens = new HashMap<>();
 
-  @Inject
-  private JChannel channel;
-  @Inject
-  private GameServerProperties props;
+  private final GameServerMainProperties props;
+  private final String url;
 
-  private String url;
-
-  @PostConstruct
-  public void init() throws Exception {
-    url = props.getIp() + ":" + props.getPort() + GameServerConstants.GAME_SERVER_URL_SUFFIX;
+  @Inject
+  public TokenManager(InternalMessageBroker broker, GameServerMainProperties props) {
+    super(broker);
+    this.props = props;
+    this.url = props.getIp() + ":" + props.getPort() + GameServerConstants.GAME_SERVER_URL_SUFFIX;
   }
 
   public PlayerToken requestToken(String key) {
@@ -60,10 +56,10 @@ public class TokenManager implements InternalMessageHandler {
   }
 
   @Override
-  public void handle(InternalMessage msg, Address src) throws Exception {
+  protected void handle(InternalMessage msg, Object src) throws Exception {
     if(GatewayMessageEnum.REQUEST_TOKEN.equals(msg.getType())) {
       RequestToken reqToken = (RequestToken) msg;
-      channel.send(src, requestToken(reqToken.getKey()));
+      send(requestToken(reqToken.getKey()), src);
     }
   }
 }

@@ -1,4 +1,4 @@
-app.factory('GameSocket', function(GameApi) {
+app.service('GameSocket', function(GameApi) {
 
   var socket;
   GameApi.token().then(function(token) {

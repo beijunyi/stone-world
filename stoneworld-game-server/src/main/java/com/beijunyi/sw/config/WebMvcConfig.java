@@ -2,6 +2,7 @@ package com.beijunyi.sw.config;
 
 import javax.inject.Inject;
 
+import com.beijunyi.sw.GameServerConstants;
 import com.beijunyi.sw.websocket.GameWebSocketService;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.DefaultServletHandlerConfigurer;
@@ -21,7 +22,7 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter implements WebSocketCo
 
   @Override
   public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-    registry.addHandler(gameWebSocketService, "/socket");
+    registry.addHandler(gameWebSocketService, GameServerConstants.GAME_SERVER_URL_SUFFIX);
   }
 
   @Override

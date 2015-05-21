@@ -5,32 +5,27 @@ import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import com.beijunyi.sw.message.InternalMessage;
+import com.beijunyi.sw.message.InternalMessageBroker;
 import com.beijunyi.sw.message.InternalMessageHandler;
 import com.beijunyi.sw.message.gatewayserver.GatewayServerOffline;
 import com.beijunyi.sw.message.gatewayserver.GatewayServerOnline;
-import org.jgroups.Address;
-import org.jgroups.JChannel;
 
 @Named
-public class GatewayServerStateManager implements InternalMessageHandler {
+public class GatewayServerStateManager extends InternalMessageHandler {
 
   @Inject
-  private JChannel channel;
-
+  public GatewayServerStateManager(InternalMessageBroker broker) {
+    super(broker);
+  }
 
   @PostConstruct
   public void init() throws Exception {
-    channel.send(null, new GatewayServerOnline());
+    broadcast(new GatewayServerOnline());
   }
 
   @PreDestroy
   public void dispose() throws Exception {
-    channel.send(null, new GatewayServerOffline());
+    broadcast(new GatewayServerOffline());
   }
 
-  @Override
-  public void handle(InternalMessage msg, Address src) throws Exception {
-
-  }
 }

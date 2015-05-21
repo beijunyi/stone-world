@@ -14,7 +14,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
-import com.beijunyi.sw.config.GatewayServerResourceConfig;
+import com.beijunyi.sw.config.model.GatewayServerResourceProperties;
 import com.beijunyi.sw.sa.models.*;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
@@ -28,7 +28,7 @@ public class SaResourcesManager {
   private static final Logger log = LoggerFactory.getLogger(SaResourcesManager.class);
 
   private final Kryo kryo;
-  private final Properties props;
+  private final GatewayServerResourceProperties props;
 
   private Map<Integer, AdrnBlock> idAdrnMap;
   private Map<Integer, Integer> mapIdMap;
@@ -46,14 +46,14 @@ public class SaResourcesManager {
   private int maxLS2MapId;
 
   @Inject
-  public SaResourcesManager(@Named("resource-properties") Properties props, Kryo kryo) {
+  public SaResourcesManager(GatewayServerResourceProperties props, Kryo kryo) {
     this.props = props;
     this.kryo = kryo;
   }
 
   @PostConstruct
   public void prepareResources() throws IOException {
-    Path saDataDir = Paths.get(props.getProperty(GatewayServerResourceConfig.SA_DATA_PROPERTY_KEY));
+    Path saDataDir = props.getSaDataLocation();
     if(Files.exists(saDataDir)) {
       Map<ClientResource, Map<Integer, Path>> resources = new HashMap<>();
       locateClientResources(saDataDir, resources);
@@ -64,7 +64,7 @@ public class SaResourcesManager {
       indexPalets(resources);
     }
 
-    Path gmsvDataDir = Paths.get(props.getProperty(GatewayServerResourceConfig.GMSV_DATA_PROPERTY_KEY));
+    Path gmsvDataDir = props.getGmsvDataLocation();
     indexLS2Maps(gmsvDataDir, kryo);
   }
 

@@ -1,9 +1,22 @@
 package com.beijunyi.sw.message;
 
-import org.jgroups.Address;
+public abstract class InternalMessageHandler {
 
-public interface InternalMessageHandler {
+  private final InternalMessageBroker broker;
 
-  void handle(InternalMessage msg, Address src) throws Exception;
+  protected InternalMessageHandler(InternalMessageBroker broker) {
+    this.broker = broker;
+  }
+
+  protected void handle(InternalMessage msg, Object src) throws Exception {
+  }
+
+  protected void send(InternalMessage msg, Object dest) {
+    broker.send(msg, dest);
+  }
+
+  protected void broadcast(InternalMessage msg) {
+    broker.broadcast(msg);
+  }
 
 }
