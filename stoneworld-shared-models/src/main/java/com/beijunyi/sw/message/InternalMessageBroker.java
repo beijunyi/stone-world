@@ -1,14 +1,15 @@
 package com.beijunyi.sw.message;
 
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.concurrent.CopyOnWriteArrayList;
+import javax.annotation.PreDestroy;
 
 import org.jgroups.*;
 
 public class InternalMessageBroker extends ReceiverAdapter {
 
   private final JChannel channel;
-  private final Collection<InternalMessageHandler> handlers = new ArrayList<>();
+  private final Collection<InternalMessageHandler> handlers = new CopyOnWriteArrayList<>();
 
   public InternalMessageBroker(JChannel channel) {
     this.channel = channel;
@@ -26,6 +27,15 @@ public class InternalMessageBroker extends ReceiverAdapter {
         }
       }
     }
+  }
+
+  @PreDestroy
+  private void releaseChannel() {
+    channel.close();
+  }
+
+  void addHandler(InternalMessageHandler handler) {
+    handlers.add(handler);
   }
 
   void send(InternalMessage msg, Object dest) {

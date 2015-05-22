@@ -7,7 +7,9 @@ app.service('GameApi', function($http, $q, $timeout) {
       var deferred = $q.defer();
       function requestToken(retry, delay) {
         $http.get(prefix + 'token').success(function(resp) {
-          if(resp == null) {
+          if(angular.isObject(resp)) {
+            deferred.resolve(resp);
+          } else {
             if(retry == 0) {
               deferred.reject('Cannot obtain login token');
             } else {
@@ -15,8 +17,6 @@ app.service('GameApi', function($http, $q, $timeout) {
                 requestToken(retry - 1, delay);
               }, delay)
             }
-          } else {
-            deferred.resolve(resp);
           }
         });
       }

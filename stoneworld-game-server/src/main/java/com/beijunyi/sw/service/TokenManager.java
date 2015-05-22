@@ -27,7 +27,7 @@ public class TokenManager extends InternalMessageHandler {
   public TokenManager(InternalMessageBroker broker, GameServerMainProperties props) {
     super(broker);
     this.props = props;
-    this.url = props.getIp() + ":" + props.getPort() + GameServerConstants.GAME_SERVER_URL_SUFFIX;
+    this.url = GameServerConstants.GAME_SERVER_URL_PROTOCOL + props.getIp() + ":" + props.getPort() + GameServerConstants.GAME_SERVER_URL_PATH;
   }
 
   public PlayerToken requestToken(String key) {

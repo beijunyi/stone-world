@@ -6,6 +6,7 @@ public abstract class InternalMessageHandler {
 
   protected InternalMessageHandler(InternalMessageBroker broker) {
     this.broker = broker;
+    broker.addHandler(this);
   }
 
   protected void handle(InternalMessage msg, Object src) throws Exception {
