@@ -22,7 +22,7 @@ public class WebMvcConfig extends WebMvcConfigurerAdapter implements WebSocketCo
 
   @Override
   public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-    registry.addHandler(gameWebSocketService, GameServerConstants.GAME_SERVER_URL_PATH);
+    registry.addHandler(gameWebSocketService, GameServerConstants.GAME_SOCKET_URL_PATH).setAllowedOrigins("*");
   }
 
   @Override
